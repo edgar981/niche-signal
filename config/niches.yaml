@@ -17,6 +17,7 @@ niches:
       # - com.treintaapp         # Treinta – gestiona tu negocio (10M+)
       # - com.nequi.negocios     # Nequi Negocios (100k+)
     # The keys below are read by collectors added in later steps (2–3).
+    # Mercado Libre is parked (2026-11-09): no collector reads this key. See README "Sources".
     mercadolibre_queries: ["software contable", "facturación electrónica"]
     # Video ids or URLs. Picked 2026-11-09 by topic (checked to exist; comment counts unknown
     # until the first run, which logs how many comments each video gave).

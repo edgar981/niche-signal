@@ -37,6 +37,11 @@ signals it hasn't seen (`--retry-failed` re-runs failures).
   plus 1 per 100 comments (free default: 10,000 units a day). Comments by the video's own channel
   are left out; commenters are only hashed, and @mentions, emails, phones and links are scrubbed.
   The video title is added as the text's first line (`Video: …`) after filtering.
+- Mercado Libre — parked (2026-11-09), no collector. Tested with a registered app, using both an
+  app token (client credentials) and a user token: search, catalog, items and reviews all return
+  403 (`PA_UNAUTHORIZED_RESULT_FROM_POLICIES`). Only `/questions/search?item=` answers, and that
+  gives few, short pre-sale questions. Pages can't be scraped instead: the spec allows only the API
+  for this site.
 
 ## Review loop
 
