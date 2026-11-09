@@ -17,7 +17,7 @@ uv run niche-miner run-all --niche contadores_pymes --limit 50   # quick test ru
 uv run niche-miner run-all --niche contadores_pymes              # full run
 ```
 
-Or step by step: `collect --niche X [--source google_play|computrabajo] [--limit N]`, `extract`,
+Or step by step: `collect --niche X [--source google_play|computrabajo|youtube] [--limit N]`, `extract`,
 `cluster`, `score`, `report`. Reports land in `data/reports/YYYY-MM-DD.md`; everything else
 in `data/signals.db`. Re-running `collect` only adds new signals; `extract` only processes
 signals it hasn't seen (`--retry-failed` re-runs failures).
@@ -31,6 +31,12 @@ signals it hasn't seen (`--retry-failed` re-runs failures).
   every request, offers already in the DB never re-fetched, at most 30 offer pages per query per
   run, and HTTP 403/429 stops the source. Company names, emails, phones and links are never
   stored. Delete `computrabajo_queries` from a niche to turn it off.
+- `youtube` — comments on the `youtube_video_ids` (ids or URLs) via the Data API v3. Needs
+  `YOUTUBE_API_KEY` in `.env` (Google Cloud project with "YouTube Data API v3" enabled, then an
+  API key restricted to that API); without it the source is skipped. Each video costs 1 quota unit
+  plus 1 per 100 comments (free default: 10,000 units a day). Comments by the video's own channel
+  are left out; commenters are only hashed, and @mentions, emails, phones and links are scrubbed.
+  The video title is added as the text's first line (`Video: …`) after filtering.
 
 ## Review loop
 

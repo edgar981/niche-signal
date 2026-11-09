@@ -1,0 +1,91 @@
+{
+  "_comment": "Synthetic commentThreads.list response (part=snippet,replies, textFormat=plainText) in the shape of the YouTube Data API v3; made-up content.",
+  "kind": "youtube#commentThreadListResponse",
+  "nextPageToken": "PAGE2",
+  "items": [
+    {
+      "kind": "youtube#commentThread",
+      "id": "UgxThreadOne",
+      "snippet": {
+        "channelId": "UCownerChannel000000000",
+        "videoId": "AbCdEfGhI_1",
+        "topLevelComment": {
+          "kind": "youtube#comment",
+          "id": "UgxThreadOne",
+          "snippet": {
+            "authorDisplayName": "@MariaContadora",
+            "authorChannelId": {"value": "UCmaria00000000000000000"},
+            "textDisplay": "Llevo tres días intentando transmitir la nómina electrónica y la DIAN me rechaza todo con el mismo error, el soporte no contesta y yo pago la licencia anual. Escríbanme a maria.ejemplo@correo.co",
+            "likeCount": 12,
+            "publishedAt": "2026-05-04T13:20:00Z",
+            "updatedAt": "2026-05-04T13:20:00Z"
+          }
+        },
+        "totalReplyCount": 2
+      },
+      "replies": {
+        "comments": [
+          {
+            "kind": "youtube#comment",
+            "id": "UgxThreadOne.reply1",
+            "snippet": {
+              "authorDisplayName": "@CanalDeEjemplo",
+              "authorChannelId": {"value": "UCownerChannel000000000"},
+              "textDisplay": "Hola, escríbenos por el chat de soporte de la plataforma y con gusto te ayudamos con ese rechazo.",
+              "parentId": "UgxThreadOne",
+              "publishedAt": "2026-05-04T15:00:00Z"
+            }
+          },
+          {
+            "kind": "youtube#comment",
+            "id": "UgxThreadOne.reply2",
+            "snippet": {
+              "authorDisplayName": "@PedroAuxiliar",
+              "authorChannelId": {"value": "UCpedro00000000000000000"},
+              "textDisplay": "@@MariaContadora a mí me pasa igual desde enero, me toca hacer la nómina en Excel y subirla a mano. Llámeme al 310 555 0123",
+              "parentId": "UgxThreadOne",
+              "publishedAt": "2026-05-05T09:00:00Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "kind": "youtube#commentThread",
+      "id": "UgxThreadTwo",
+      "snippet": {
+        "channelId": "UCownerChannel000000000",
+        "videoId": "AbCdEfGhI_1",
+        "topLevelComment": {
+          "kind": "youtube#comment",
+          "id": "UgxThreadTwo",
+          "snippet": {
+            "authorDisplayName": "@AnaPyme",
+            "authorChannelId": {"value": "UCana000000000000000000"},
+            "textDisplay": "Gracias!!",
+            "publishedAt": "2026-05-03T10:00:00Z"
+          }
+        },
+        "totalReplyCount": 0
+      }
+    },
+    {
+      "kind": "youtube#commentThread",
+      "id": "UgxThreadThree",
+      "snippet": {
+        "channelId": "UCownerChannel000000000",
+        "videoId": "AbCdEfGhI_1",
+        "topLevelComment": {
+          "kind": "youtube#comment",
+          "id": "UgxThreadThree",
+          "snippet": {
+            "authorDisplayName": "",
+            "textDisplay": "No entiendo por qué el documento soporte me sale con el CUDS inválido si llené todos los campos como en el video &amp; revisé dos veces.",
+            "publishedAt": "2026-05-02T08:30:00Z"
+          }
+        },
+        "totalReplyCount": 0
+      }
+    }
+  ]
+}

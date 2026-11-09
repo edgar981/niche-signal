@@ -47,11 +47,21 @@ class ComputrabajoSettings(BaseModel):
     timeout_s: float = 20.0
 
 
+class YouTubeSettings(BaseModel):
+    api_url: str = "https://www.googleapis.com/youtube/v3"
+    max_pages_per_video: int = Field(5, ge=1)  # 100 comment threads per page, 1 quota unit each
+    order: Literal["time", "relevance"] = "time"
+    include_replies: bool = True  # the few replies the API returns inside each thread
+    min_interval_s: float = 0.5
+    timeout_s: float = 20.0
+
+
 class CollectorSettings(BaseModel):
     retries: int = 3
     backoff_s: float = 2.0
     google_play: GooglePlaySettings = Field(default_factory=GooglePlaySettings)
     computrabajo: ComputrabajoSettings = Field(default_factory=ComputrabajoSettings)
+    youtube: YouTubeSettings = Field(default_factory=YouTubeSettings)
 
 
 class ClusterSettings(BaseModel):

@@ -18,7 +18,18 @@ niches:
       # - com.nequi.negocios     # Nequi Negocios (100k+)
     # The keys below are read by collectors added in later steps (2–3).
     mercadolibre_queries: ["software contable", "facturación electrónica"]
-    youtube_video_ids: []
+    # Video ids or URLs. Picked 2026-11-09 by topic (checked to exist; comment counts unknown
+    # until the first run, which logs how many comments each video gave).
+    youtube_video_ids:
+      - Niqto0rumHQ   # Soporte Tributario Integral: facturar gratis en la DIAN, guía 2026
+      - 0AM-WHShurw   # Soporte Tributario Integral: primera factura en el software gratuito DIAN
+      - MqqsE8LQdvU   # Ray Blker: factura electrónica en la plataforma DIAN gratis 2024
+      - miTBZX7WcLU   # Martinez Contadores: factura en la plataforma gratuita de la DIAN
+      - T6rytA1Uo0w   # Accounterweb: nómina electrónica con el sistema gratuito DIAN
+      - 7AcvKHPmhGs   # SEDI Solutions: nómina electrónica DIAN mediante Excel
+      - OeqZA_QB068   # Actualícese: habilitación de nómina electrónica en la DIAN
+      - AWJNC_JSYko   # Franklin Salazar: facturas electrónicas en Siigo Nube
+      - nq7fqrZAUYM   # Innovación Siigo: facturación electrónica en Siigo Nube
     computrabajo_queries: ["auxiliar contable excel", "conciliación bancaria"]
     facebook_groups: []          # e.g. "https://www.facebook.com/groups/<id>"
     gmaps_queries: ["software contable Bogotá"]

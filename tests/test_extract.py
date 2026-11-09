@@ -132,7 +132,8 @@ def test_prompt_uses_batch_local_ids_and_bounds_text(conn):
 def test_source_hint_names_the_reviewed_app():
     url = "https://play.google.com/store/apps/details?id=com.siigo.nubeapp&hl=es&reviewId=x"
     assert "com.siigo.nubeapp" in source_hint("google_play", url)
-    assert source_hint("youtube", None) == "youtube"
+    assert "'Video:'" in source_hint("youtube", None)
+    assert source_hint("apify_tiktok", None) == "apify_tiktok"  # no hint: the source name
 
 
 # --- extractor flow ------------------------------------------------------------------------

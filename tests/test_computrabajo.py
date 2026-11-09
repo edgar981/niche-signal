@@ -19,9 +19,9 @@ from niche_miner.collectors.computrabajo import (
     job_posting,
     parse_offer,
     parse_search,
-    scrub,
     search_url,
 )
+from niche_miner.collectors.pii import scrub
 from niche_miner.collectors.robots import Robots
 from niche_miner.settings import ComputrabajoSettings, Settings
 

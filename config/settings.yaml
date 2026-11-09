@@ -40,6 +40,13 @@ collectors:
     max_pages_per_query: 2     # search pages hold 20 offers each
     max_offers_per_query: 30   # offer pages fetched per query per run (known offers are skipped)
     timeout_s: 20
+  youtube:
+    # Needs YOUTUBE_API_KEY in .env (skipped with a log line otherwise). Quota per video per
+    # run: 1 unit for the title + 1 per page; the free default is 10,000 units a day.
+    max_pages_per_video: 5     # 100 comment threads per page
+    order: time                # time (newest first) | relevance
+    include_replies: true      # replies by the video's own channel are always left out
+    min_interval_s: 0.5
 
 clustering:
   method: auto            # auto | hdbscan | llm (auto = llm below llm_max_pains pains per niche)

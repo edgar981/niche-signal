@@ -144,6 +144,9 @@ def source_hint(source: str, url: str | None) -> str:
         return f"reseña de 1-2 estrellas en Google Play (tienda Colombia), app con id {app_id}"
     if source == "computrabajo":
         return "oferta de empleo en Computrabajo Colombia, escrita por la empresa que contrata"
+    if source == "youtube":
+        return ("comentario en un video de YouTube; la línea 'Video:' es el título del video, "
+                "contexto que no escribió quien comenta")
     return source
 
 

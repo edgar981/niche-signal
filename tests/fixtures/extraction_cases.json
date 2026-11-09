@@ -178,5 +178,27 @@
       "is_complaint": false,
       "country": "co"
     }
+  },
+  {
+    "id": "youtube_nomina_rechazo",
+    "source": "youtube",
+    "url": "https://www.youtube.com/watch?v=AbCdEfGhI_1&lc=UgxCaseYT01",
+    "text": "Video: Nómina electrónica en Siigo Nube paso a paso\n\nLlevo tres días intentando transmitir la nómina electrónica de mis 8 empleados y la DIAN me la rechaza siempre con el mismo error. El soporte no contesta y pago el plan anual. ¿A alguien más le pasa?",
+    "expect": {
+      "is_complaint": true,
+      "who_type": "business",
+      "spend": true,
+      "country": "co"
+    }
+  },
+  {
+    "id": "youtube_gracias",
+    "source": "youtube",
+    "url": "https://www.youtube.com/watch?v=AbCdEfGhI_2&lc=UgxCaseYT02",
+    "text": "Video: Errores de la factura electrónica DIAN y cómo solucionarlos\n\nExcelente explicación profe, muy clara, me sirvió muchísimo para el cierre de este mes. Saludos desde Pereira.",
+    "expect": {
+      "is_complaint": false,
+      "country": "co"
+    }
   }
 ]

@@ -1,0 +1,16 @@
+{
+  "_comment": "Synthetic videos.list response (part=snippet) in the shape of the YouTube Data API v3; made-up content.",
+  "kind": "youtube#videoListResponse",
+  "items": [
+    {
+      "kind": "youtube#video",
+      "id": "AbCdEfGhI_1",
+      "snippet": {
+        "publishedAt": "2026-03-02T15:00:00Z",
+        "channelId": "UCownerChannel000000000",
+        "title": "Nómina electrónica paso a paso &amp; errores comunes",
+        "channelTitle": "Canal de Ejemplo Contable"
+      }
+    }
+  ]
+}

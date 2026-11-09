@@ -90,12 +90,17 @@ class Collector(ABC):
         try:
             for signal in self.fetch(target, tag):
                 if self.filter.keep(signal):
-                    kept.append(signal)
+                    kept.append(self.finish(signal))
                     n += 1
                     if quota and n >= quota:
                         break
         finally:
             log.info("%s: %s -> %d signals kept", self.source, target, n)
+
+    def finish(self, signal: RawSignal) -> RawSignal:
+        """Runs on signals that passed the filters, for context the filters must not judge
+        (e.g. a video title that would make a short comment look long enough)."""
+        return signal
 
     def call(self, fn: Callable[..., T], *args: Any, **kwargs: Any) -> T:
         """Rate-limited request with exponential backoff. SkipTarget/StopSource are not retried."""

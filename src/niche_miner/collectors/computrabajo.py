@@ -24,6 +24,7 @@ from urllib.request import Request, urlopen
 from ..models import RawSignal
 from ..settings import Settings
 from .base import Collector, SkipTarget, StopSource, hash_author
+from .pii import scrub  # job posts often ask for CVs by email or WhatsApp
 from .robots import Robots
 
 log = logging.getLogger(__name__)
@@ -39,10 +40,6 @@ _OFFER_BLOCK = re.compile(
     re.S)
 _BREAK = re.compile(r"<br\s*/?>|</(?:p|li|div|h\d)>", re.I)
 _TAG = re.compile(r"<[^>]+>")
-_EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
-_LINK = re.compile(r"(?:https?://|www\.)\S+", re.I)
-# Colombian mobiles (3xx) and landlines (60x), 10 digits, optional +57 — not salary amounts.
-_PHONE = re.compile(r"(?<!\d)(?:\+?57[\s-]?)?\(?(?:3\d{2}|60\d)\)?[\s.-]?\d{3}[\s.-]?\d{4}(?!\d)")
 _UNITS = {"HOUR": "por hora", "DAY": "diario", "WEEK": "semanal", "MONTH": "mensual",
           "YEAR": "anual"}
 ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"  # a browser's default
@@ -76,11 +73,6 @@ def html_to_text(fragment: str) -> str:
     text = _TAG.sub(" ", _BREAK.sub("\n", html.unescape(fragment)))
     lines = (" ".join(line.split()) for line in text.splitlines())
     return "\n".join(line for line in lines if line)
-
-
-def scrub(text: str) -> str:
-    """Drop contact details: job posts often ask to send a CV to an email or WhatsApp."""
-    return _PHONE.sub("[teléfono]", _LINK.sub("[enlace]", _EMAIL.sub("[correo]", text)))
 
 
 def job_posting(page_html: str) -> dict[str, Any] | None:
