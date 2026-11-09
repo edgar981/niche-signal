@@ -31,6 +31,15 @@ collectors:
     max_reviews_per_app: 300   # raw reviews fetched per app per run, split across scores
     page_size: 100
     min_interval_s: 1.0   # rate limit between requests
+  computrabajo:
+    # Its legal terms forbid scripts and crawlers; run at low volume by the owner's decision
+    # (2026-11-09). robots.txt is checked before every request; HTTP 403/429 stops the source.
+    base_url: https://co.computrabajo.com
+    user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+    min_interval_s: 3.0   # seconds between requests; 2.0 is the enforced minimum
+    max_pages_per_query: 2     # search pages hold 20 offers each
+    max_offers_per_query: 30   # offer pages fetched per query per run (known offers are skipped)
+    timeout_s: 20
 
 clustering:
   method: auto            # auto | hdbscan | llm (auto = llm below llm_max_pains pains per niche)

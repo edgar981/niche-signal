@@ -37,10 +37,21 @@ class GooglePlaySettings(BaseModel):
     min_interval_s: float = 1.0
 
 
+class ComputrabajoSettings(BaseModel):
+    base_url: str = "https://co.computrabajo.com"
+    user_agent: str = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+                       "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
+    min_interval_s: float = Field(3.0, ge=2.0)  # SPEC: polite delays of at least 2s
+    max_pages_per_query: int = Field(2, ge=1)  # search pages hold 20 offers each
+    max_offers_per_query: int = Field(30, ge=1)  # offer pages fetched per query per run
+    timeout_s: float = 20.0
+
+
 class CollectorSettings(BaseModel):
     retries: int = 3
     backoff_s: float = 2.0
     google_play: GooglePlaySettings = Field(default_factory=GooglePlaySettings)
+    computrabajo: ComputrabajoSettings = Field(default_factory=ComputrabajoSettings)
 
 
 class ClusterSettings(BaseModel):

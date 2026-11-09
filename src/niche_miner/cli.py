@@ -75,7 +75,9 @@ def _collect(c: Context, niche: str, source: str | None, limit: int | None) -> N
     for name, collector_cls in REGISTRY.items():
         if source and name != source:
             continue
-        signals = collector_cls(c.settings, limit=limit).collect(cfg)
+        collector = collector_cls(c.settings, limit=limit,
+                                  known_ids=db.external_ids(c.conn, name))
+        signals = collector.collect(cfg)
         new = db.insert_signals(c.conn, signals)
         typer.echo(f"collect {name}: {len(signals)} signals kept, {new} new "
                    f"({len(signals) - new} already in the DB)")

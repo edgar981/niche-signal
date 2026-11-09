@@ -72,6 +72,20 @@ translate, shorten or fix typos. null if there is none.
 - severity: 1 to 5. 1 = minor annoyance; 3 = recurring problem that costs time or money; \
 5 = it blocks their work or business, or makes them lose money or customers.
 
+Job posts (fuente "oferta de empleo"): the hiring business is the writer, and paying a person \
+to do the work is its workaround. is_complaint is true when the post describes recurring \
+operational work that software could take over or speed up (bookkeeping, bank \
+reconciliation, invoicing, data entry, inventory, collections, payroll, Excel reports); pain \
+names that work as the business's need, e.g. "Necesita conciliar los extractos bancarios y \
+registrar las facturas de proveedores cada mes."; pain_type is usually "missing_capability"; \
+who is the kind of business hiring, from its sector or the text (e.g. "empresa \
+distribuidora", "constructora"), never the job title; who_type is "business"; current_tool is \
+the software the post asks for, by product name ("Siigo", "World Office"), or \
+"manual/Excel/WhatsApp" if it only asks for Excel; spend_signal is the "Salario:" line or the \
+sentence that shows the hire, copied exactly; severity is usually 3. is_complaint is false \
+for posts without such work (sales, driving, cleaning, customer service) and for courses or \
+ads posing as jobs.
+
 Do not invent facts the text does not support."""
 
 _NULLABLE_STRING = {"type": ["string", "null"]}
@@ -128,6 +142,8 @@ def source_hint(source: str, url: str | None) -> str:
     if source == "google_play" and url:
         app_id = parse_qs(urlparse(url).query).get("id", ["?"])[0]
         return f"reseña de 1-2 estrellas en Google Play (tienda Colombia), app con id {app_id}"
+    if source == "computrabajo":
+        return "oferta de empleo en Computrabajo Colombia, escrita por la empresa que contrata"
     return source
 
 

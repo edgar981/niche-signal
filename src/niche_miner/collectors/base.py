@@ -7,7 +7,7 @@ import logging
 import math
 import time
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Collection, Iterator
 from typing import Any, ClassVar, TypeVar
 
 from ..models import RawSignal
@@ -35,9 +35,11 @@ class Collector(ABC):
     config_key: ClassVar[str]  # the only niches.yaml key this collector reads
     min_interval_s: float = 1.0
 
-    def __init__(self, settings: Settings, limit: int | None = None):
+    def __init__(self, settings: Settings, limit: int | None = None,
+                 known_ids: Collection[str] = frozenset()):
         self.settings = settings
         self.limit = limit
+        self.known_ids = known_ids  # external ids already in the DB; fetch() may skip them
         self.filter = TextFilter(settings.filters)
         self._last_request = 0.0
 
@@ -68,7 +70,7 @@ class Collector(ABC):
                     break
                 quota = math.ceil(remaining / (len(targets) - i))
             try:
-                kept.extend(self._collect_target(target, tag, quota))
+                self._collect_target(target, tag, quota, kept)
             except SkipTarget as e:
                 log.warning("%s: skipping %s: %s", self.source, target, e)
             except StopSource as e:
@@ -81,15 +83,19 @@ class Collector(ABC):
             log.info("%s: dropped by filters: %s", self.source, dropped)
         return kept[: self.limit] if self.limit else kept
 
-    def _collect_target(self, target: str, tag: str, quota: int | None) -> list[RawSignal]:
-        out: list[RawSignal] = []
-        for signal in self.fetch(target, tag):
-            if self.filter.keep(signal):
-                out.append(signal)
-                if quota and len(out) >= quota:
-                    break
-        log.info("%s: %s -> %d signals kept", self.source, target, len(out))
-        return out
+    def _collect_target(self, target: str, tag: str, quota: int | None,
+                        kept: list[RawSignal]) -> None:
+        """Appends to kept as it goes, so signals fetched before an error are not lost."""
+        n = 0
+        try:
+            for signal in self.fetch(target, tag):
+                if self.filter.keep(signal):
+                    kept.append(signal)
+                    n += 1
+                    if quota and n >= quota:
+                        break
+        finally:
+            log.info("%s: %s -> %d signals kept", self.source, target, n)
 
     def call(self, fn: Callable[..., T], *args: Any, **kwargs: Any) -> T:
         """Rate-limited request with exponential backoff. SkipTarget/StopSource are not retried."""

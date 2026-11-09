@@ -155,5 +155,28 @@
       "is_complaint": true,
       "pain_type": "pricing"
     }
+  },
+  {
+    "id": "oferta_conciliaciones",
+    "source": "computrabajo",
+    "url": "https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-auxiliar-contable-en-medellin-0000000000000000000000000000CA01",
+    "text": "Auxiliar contable\nSector: Venta al por mayor\nUbicación: Medellín, Antioquia\nSalario: $ 1.800.000 COP mensual\n\nDistribuidora de insumos para panaderías requiere auxiliar contable para registrar las facturas de proveedores en Siigo, hacer cada mes las conciliaciones bancarias de tres cuentas y armar en Excel el informe semanal de cartera por cliente.\nHorario de lunes a viernes.\n-Requerimientos-\nEducación mínima: Técnico\n1 año de experiencia\nConocimientos: Conciliaciones bancarias, Microsoft excel, Siigo",
+    "expect": {
+      "is_complaint": true,
+      "who_type": "business",
+      "spend": true,
+      "country": "co",
+      "pain_type": "missing_capability"
+    }
+  },
+  {
+    "id": "oferta_ventas",
+    "source": "computrabajo",
+    "url": "https://co.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-asesor-comercial-en-cali-0000000000000000000000000000CA02",
+    "text": "Asesor comercial puerta a puerta\nSector: Telecomunicaciones\nUbicación: Cali, Valle del Cauca\nSalario: $ 1.423.500 COP mensual\n\nBuscamos asesores comerciales para la venta de planes de internet hogar en los barrios de Cali. Ofrecemos capacitación, comisiones quincenales sin techo y estabilidad laboral.\n-Requerimientos-\nEducación mínima: Bachillerato / Educación Media\n6 meses de experiencia en ventas",
+    "expect": {
+      "is_complaint": false,
+      "country": "co"
+    }
   }
 ]

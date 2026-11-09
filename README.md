@@ -17,10 +17,20 @@ uv run niche-miner run-all --niche contadores_pymes --limit 50   # quick test ru
 uv run niche-miner run-all --niche contadores_pymes              # full run
 ```
 
-Or step by step: `collect --niche X [--source google_play] [--limit N]`, `extract`,
+Or step by step: `collect --niche X [--source google_play|computrabajo] [--limit N]`, `extract`,
 `cluster`, `score`, `report`. Reports land in `data/reports/YYYY-MM-DD.md`; everything else
 in `data/signals.db`. Re-running `collect` only adds new signals; `extract` only processes
 signals it hasn't seen (`--retry-failed` re-runs failures).
+
+## Sources
+
+- `google_play` — 1–2 star reviews of the `google_play_apps` in the Colombian store.
+- `computrabajo` — job posts for the `computrabajo_queries` (search pages, then each offer's
+  page). Computrabajo's legal terms forbid scripts and crawlers; it runs at low volume by the
+  owner's decision (2026-11-09): 3 s between requests (2 s minimum), robots.txt checked before
+  every request, offers already in the DB never re-fetched, at most 30 offer pages per query per
+  run, and HTTP 403/429 stops the source. Company names, emails, phones and links are never
+  stored. Delete `computrabajo_queries` from a niche to turn it off.
 
 ## Review loop
 

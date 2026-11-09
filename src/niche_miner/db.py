@@ -134,6 +134,11 @@ def insert_signals(conn: sqlite3.Connection, signals: Iterable[RawSignal]) -> in
     return conn.total_changes - before
 
 
+def external_ids(conn: sqlite3.Connection, source: str) -> set[str]:
+    rows = conn.execute("SELECT external_id FROM raw_signals WHERE source = ?", (source,))
+    return {r[0] for r in rows}
+
+
 def pending_signals(conn: sqlite3.Connection, niche: str | None = None,
                     limit: int | None = None) -> list[sqlite3.Row]:
     """Raw signals without an extraction row yet, oldest first."""

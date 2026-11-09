@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from datetime import UTC, datetime
 from typing import Any
 
@@ -61,8 +61,9 @@ class GooglePlayCollector(Collector):
     source = SOURCE
     config_key = "google_play_apps"
 
-    def __init__(self, settings: Settings, limit: int | None = None):
-        super().__init__(settings, limit)
+    def __init__(self, settings: Settings, limit: int | None = None,
+                 known_ids: Collection[str] = frozenset()):
+        super().__init__(settings, limit, known_ids)
         self.cfg = settings.collectors.google_play
         self.min_interval_s = self.cfg.min_interval_s
 
