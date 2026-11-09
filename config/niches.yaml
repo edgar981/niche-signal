@@ -1,0 +1,25 @@
+# One entry per niche. Each collector reads only its own key; a missing or empty key
+# means that source is skipped for the niche (never a crash).
+#
+# google_play_apps must be real package ids from the Colombian store; a wrong id is
+# logged and skipped. Check one with:
+#   uv run python -c "from google_play_scraper import app; print(app('<id>', lang='es', country='co')['title'])"
+
+niches:
+  - tag: contadores_pymes
+    google_play_apps:
+      - com.siigo.nubeapp        # Siigo Nube App (2.2★, 50k+ installs)
+      - co.alegra.app            # Alegra (4.9★, 100k+)
+      - siigo.siigo_a_la_orden   # Siigo A La Orden (2.2★)
+      - com.worldoffice.mobile   # World Office Cloud (4.0★)
+      - co.com.psl.loggro        # Loggro (3.1★)
+      # High-volume options if you want more micro-business signal:
+      # - com.treintaapp         # Treinta – gestiona tu negocio (10M+)
+      # - com.nequi.negocios     # Nequi Negocios (100k+)
+    # The keys below are read by collectors added in later steps (2–3).
+    mercadolibre_queries: ["software contable", "facturación electrónica"]
+    youtube_video_ids: []
+    computrabajo_queries: ["auxiliar contable excel", "conciliación bancaria"]
+    facebook_groups: []          # e.g. "https://www.facebook.com/groups/<id>"
+    gmaps_queries: ["software contable Bogotá"]
+    tiktok_hashtags: ["contadorescolombia"]

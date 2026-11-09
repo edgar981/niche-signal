@@ -1,0 +1,20 @@
+# Secrets
+.env
+
+# Local data: signals.db, reports/
+data/
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache/
+
+# Virtual environments
+.venv
+
+# Personal Claude Code settings
+.claude/settings.local.json

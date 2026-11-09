@@ -1,0 +1,7 @@
+# Fold clusters together after reviewing a report: target_id: [ids to absorb].
+# The target keeps its label and quotes; metrics are recomputed over all members.
+# Ids are global (each `cluster` run creates new ones), so stale entries are
+# ignored with a warning. Re-run `niche-miner score && niche-miner report`.
+
+merges: {}
+#  12: [15, 18]

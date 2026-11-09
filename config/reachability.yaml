@@ -1,0 +1,10 @@
+# Manual review per cluster, keyed by the cluster id shown in the report.
+#   reachability 0–10: "Can I name a channel with 100+ of these people?"
+#                      0 (the default) caps the cluster's score at 20.
+#   competition  0–10: 10 = strong incumbents. Subtracted from the score.
+# Ids are global: each `niche-miner cluster` run creates new ids, so entries for
+# older runs simply stop matching. Re-run `niche-miner score && niche-miner report`
+# after editing.
+
+clusters: {}
+#  12: {reachability: 7, competition: 3, note: "Grupo FB Contadores Colombia (45k)"}

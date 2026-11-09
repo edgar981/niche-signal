@@ -1,0 +1,39 @@
+[project]
+name = "niche-miner"
+version = "0.1.0"
+description = "Personal CLI pipeline: mine Colombian public complaints into scored niche-problem clusters."
+readme = "README.md"
+authors = [
+    { name = "Edgar", email = "davidnavarro81230@outlook.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=2.6.0",
+    "google-play-scraper>=1.2.7",
+    "langdetect>=1.0.9",
+    "pydantic>=2.14.3",
+    "python-dotenv>=1.2.4",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.9.1",
+    "sentence-transformers>=6.2.0",
+    "typer>=0.28.0",
+]
+
+[project.scripts]
+niche-miner = "niche_miner.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not live'"
+markers = [
+    "live: calls the real Anthropic API (needs ANTHROPIC_API_KEY); run with `uv run pytest -m live`",
+]

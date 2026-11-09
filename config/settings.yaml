@@ -1,0 +1,65 @@
+# Pipeline knobs. Every key is optional — defaults live in src/niche_miner/settings.py.
+
+llm:
+  # Cheapest model that passes tests/test_extract_live.py (`uv run pytest -m live`).
+  extract_model: claude-haiku-5-5
+  label_model: claude-haiku-5-5
+  # output_config.effort; set to null for models without effort support (e.g. claude-haiku-4-5).
+  # 2026-11-08: low failed the who_type fixture; medium passes 15/15 (≈ $0.16 per 1,000 signals).
+  effort: medium
+  batch_size: 20          # texts per extraction request
+  max_text_chars: 4000    # safety bound per text; Google Play reviews are ≤500 chars
+  max_tokens: 16000
+  # USD per million tokens, used only for cost logging. Update when prices change.
+  # (Haiku 5.5 rate for prompts ≤100K tokens; our batches are far below that.)
+  pricing:
+    claude-haiku-5-5: {input: 0.10, output: 0.50}
+    claude-haiku-4-5: {input: 1.00, output: 5.00}
+    claude-sonnet-5-5: {input: 2.00, output: 10.00}
+
+filters:
+  min_chars: 40
+  languages: [es]
+
+collectors:
+  retries: 3              # per request, exponential backoff
+  backoff_s: 2.0
+  google_play:
+    country: co
+    lang: es
+    max_score: 2          # keep 1–2 star reviews
+    max_reviews_per_app: 300   # raw reviews fetched per app per run, split across scores
+    page_size: 100
+    min_interval_s: 1.0   # rate limit between requests
+
+clustering:
+  method: auto            # auto | hdbscan | llm (auto = llm below llm_max_pains pains per niche)
+  llm_max_pains: 1500
+  embedding_model: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+  # hdbscan: PCA to n_components dims first (interim fix: the raw 384-dim space left 85%
+  # noise on the first run); null = no reduction.
+  n_components: 10
+  min_cluster_size: 5     # also the minimum theme size for the llm method
+  min_samples: 2          # null = HDBSCAN default (= min_cluster_size)
+  noise_warning: 0.6      # log a warning when more than this share of pains is noise
+  label_examples: 10      # hdbscan: most central pains sent to Claude for the label
+  representatives: 3      # quotes per cluster in the report
+  llm_themes: 15          # llm: themes proposed in one call from all pains
+  llm_batch_size: 50      # llm: pains per theme-assignment request
+  llm_theme_effort: medium
+
+scoring:                  # see the formula printed at the top of each report
+  frequency: 30
+  frequency_saturation: 50   # distinct authors that earn full frequency points
+  spend: 30
+  b2b: 20
+  reachability: 20
+  competition: 20
+  unreachable_cap: 20     # max score while reachability is 0
+  # Multiplies a cluster's evidence (frequency + spend + b2b) by the mean weight of its
+  # pains' types; unlisted types weigh 1.
+  pain_type_weights:
+    incumbent_quality: 0.3
+
+report:
+  top_n: 10

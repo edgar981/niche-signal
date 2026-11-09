@@ -1,0 +1,159 @@
+[
+  {
+    "id": "factura_dian",
+    "source": "google_play",
+    "url": "https://play.google.com/store/apps/details?id=com.siigo.nubeapp&hl=es&gl=CO&reviewId=case-1",
+    "text": "Llevo tres semanas tratando de que la factura electrónica me salga sin el error de validación de la DIAN y nada. Al final le tuve que pagar 200 mil a un contador para que me la arreglara.",
+    "expect": {
+      "is_complaint": true,
+      "who_type": "business",
+      "spend": true,
+      "min_severity": 3,
+      "country": "co"
+    }
+  },
+  {
+    "id": "elogio",
+    "source": "google_play",
+    "url": "https://play.google.com/store/apps/details?id=co.alegra.app&hl=es&gl=CO&reviewId=case-2",
+    "text": "Excelente aplicación, muy fácil de usar y el soporte me respondió rapidísimo. La recomiendo a todos mis colegas.",
+    "expect": {
+      "is_complaint": false,
+      "spend": false
+    }
+  },
+  {
+    "id": "conciliacion_excel",
+    "source": "facebook",
+    "text": "Soy contadora independiente y manejo 15 clientes. Cada mes pierdo dos días enteros pasando los extractos bancarios a Excel para hacer la conciliación.",
+    "expect": {
+      "is_complaint": true,
+      "who_type": "business",
+      "spend": true,
+      "pain_type": "missing_capability"
+    }
+  },
+  {
+    "id": "banco_app",
+    "source": "google_play",
+    "url": "https://play.google.com/store/apps/details?id=co.com.bancolombia.personas.superapp&hl=es&gl=CO&reviewId=case-4",
+    "text": "La app del banco se cierra cada vez que intento hacer una transferencia a mi hermana, ya la reinstalé dos veces y sigue igual.",
+    "expect": {
+      "is_complaint": true,
+      "who_type": "consumer",
+      "pain_type": "incumbent_quality"
+    }
+  },
+  {
+    "id": "restaurante_whatsapp",
+    "source": "facebook",
+    "text": "Tengo un restaurante en Medellín y los domicilios por WhatsApp son un caos: se nos pierden pedidos todos los fines de semana. Tuve que contratar a una persona solo para contestar el WhatsApp.",
+    "expect": {
+      "is_complaint": true,
+      "who_type": "business",
+      "spend": true
+    }
+  },
+  {
+    "id": "spam",
+    "source": "tiktok",
+    "text": "GANA DINERO DESDE CASA sin experiencia, escríbeme al WhatsApp y te explico cómo empezar hoy mismo",
+    "expect": {
+      "is_complaint": false
+    }
+  },
+  {
+    "id": "domicilio_frio",
+    "source": "google_maps",
+    "text": "Pésimo servicio, pedí un domicilio y llegó frío después de una hora y media de espera. No vuelvo a pedir por aquí.",
+    "expect": {
+      "is_complaint": true,
+      "who_type": "consumer",
+      "pain_type": "incumbent_quality"
+    }
+  },
+  {
+    "id": "inventario_tienda",
+    "source": "google_play",
+    "url": "https://play.google.com/store/apps/details?id=co.com.psl.loggro&hl=es&gl=CO&reviewId=case-8",
+    "text": "Desde la última actualización no me deja sincronizar el inventario con la tienda virtual, me toca actualizar las existencias a mano en los dos sistemas todos los días.",
+    "expect": {
+      "is_complaint": true,
+      "who_type": "business",
+      "pain_type": "incumbent_quality"
+    }
+  },
+  {
+    "id": "pregunta_neutral",
+    "source": "mercadolibre",
+    "text": "¿Este celular trae el cargador incluido en la caja o toca comprarlo aparte?",
+    "expect": {
+      "is_complaint": false,
+      "spend": false
+    }
+  },
+  {
+    "id": "ferreteria",
+    "source": "youtube",
+    "text": "Como dueño de una ferretería necesito facturar rápido en el mostrador, pero el sistema se demora casi un minuto por factura y los clientes se aburren y se van.",
+    "expect": {
+      "is_complaint": true,
+      "who_type": "business",
+      "min_severity": 3,
+      "pain_type": "incumbent_quality"
+    }
+  },
+  {
+    "id": "cobro_doble",
+    "source": "google_play",
+    "url": "https://play.google.com/store/apps/details?id=com.siigo.nubeapp&hl=es&gl=CO&reviewId=case-11",
+    "text": "Me cobraron dos veces la suscripción del mes y nadie responde en soporte. Ya van 120 mil pesos perdidos y ninguna solución.",
+    "expect": {
+      "is_complaint": true,
+      "spend": true,
+      "pain_type": "pricing"
+    }
+  },
+  {
+    "id": "gracias",
+    "source": "google_play",
+    "url": "https://play.google.com/store/apps/details?id=co.alegra.app&hl=es&gl=CO&reviewId=case-12",
+    "text": "Muchas gracias por la actualización, ahora sí carga rápido y ya puedo ver mis reportes sin problema.",
+    "expect": {
+      "is_complaint": false,
+      "spend": false
+    }
+  },
+  {
+    "id": "mexico_cfdi",
+    "source": "google_play",
+    "url": "https://play.google.com/store/apps/details?id=co.alegra.app&hl=es&gl=CO&reviewId=case-13",
+    "text": "Desde que el SAT pidió el CFDI 4.0 la app ya no me deja timbrar las facturas de mis clientes aquí en Monterrey y nadie de soporte contesta.",
+    "expect": {
+      "is_complaint": true,
+      "country": "mx",
+      "who_type": "business"
+    }
+  },
+  {
+    "id": "reinstalar",
+    "source": "google_play",
+    "url": "https://play.google.com/store/apps/details?id=com.siigo.nubeapp&hl=es&gl=CO&reviewId=case-14",
+    "text": "Cada vez que voy a facturar me toca desinstalar y volver a instalar la aplicación porque se queda cargando y no abre.",
+    "expect": {
+      "is_complaint": true,
+      "spend": false,
+      "pain_type": "incumbent_quality"
+    }
+  },
+  {
+    "id": "plan_limite",
+    "source": "google_play",
+    "url": "https://play.google.com/store/apps/details?id=co.alegra.app&hl=es&gl=CO&reviewId=case-15",
+    "text": "Me registré y apenas ahí me entero de que el plan gratis solo deja hacer 5 facturas al mes y el siguiente plan cuesta 80 mil mensuales.",
+    "expect": {
+      "is_complaint": true,
+      "pain_type": "pricing"
+    }
+  }
+]
