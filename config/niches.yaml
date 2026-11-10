@@ -46,79 +46,635 @@ niches:
     facebook_groups: []          # public groups only, e.g. "https://www.facebook.com/groups/<id>"
     gmaps_queries: ["software contable Bogotá"]   # a Google Maps search: places + their reviews
     tiktok_hashtags: ["contadorescolombia"]       # without the #
-    # Buyer = the business that pays (assumption, 2026-11-09: pymes, not their contadores).
+    # Buyer = the business that pays AND its contador (user, 2026-11-10: both).
     buyer_roles: [dueño, dueña, propietario, propietaria, negocio, comerciante, empresa,
                   compañía, emprendedor, pyme, microempresa, gerente, administrador,
                   representante, emisor, factura, vendedor, importador, fabricante,
                   distribuidora, tienda, restaurante, cooperativa, empleador, entidad,
-                  institución, multinacional, prestador, persona natural]
+                  institución, multinacional, prestador, persona natural,
+                  contador, contadora, contable, auxiliar contable, revisor fiscal, firma contable]
 
-  # --- Candidate niches added 2026-11-09. Only seeds the user gave are filled in; a niche
-  # with no collector keys is skipped by every source until seeds are added.
-  # 1-8: no seeds yet.
-  - tag: propiedad_horizontal          # administración de conjuntos (Ley 675 paperwork, fragmented software)
-  - tag: consultorios_odontologicos_esteticos   # agendamiento, recordatorios, historia clínica light
+  # --- Candidate niches added 2026-11-09; seeds drafted by Claude 2026-11-10 for the
+  # user to edit. Free sources are live: google_play_apps (installs and 1-2 star rating
+  # counts checked in the Colombian store), youtube_video_ids (found with the Data API,
+  # comment counts as of 2026-11-10), computrabajo_queries (posts in the last 30 days in
+  # Bogotá + Medellín + Cali, counted 2026-11-10). Apify sources (gmaps_queries,
+  # tiktok_hashtags) are commented-out drafts: about $0.15 + $0.27 per niche per
+  # `collect`, so uncomment only the ones you want to pay for. buyer_roles match word
+  # prefixes anywhere in `who`, so a customer phrase like 'cliente de taller' also
+  # matches 'taller'; generic 'dueño' is left out where customers are dueños too.
+
+  - tag: propiedad_horizontal           # administración de conjuntos (Ley 675 paperwork, fragmented software)
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "administrador propiedad horizontal"           # 19
+      - "auxiliar administrativo propiedad horizontal" # 6
+    google_play_apps:
+      # Propiedata (50.000+, 126 1-2★ ratings); residents' app for PH admin software;
+      #   reviewers are mostly residents
+      - com.propiedata.resident
+    youtube_video_ids:
+      - dJoax027xeo   # 329 comments: consejos de administración en PH (2017)
+      - belfVNBCVc8   # 199: requisitos para el consejo de administración (Revista PH, 2020)
+      - OaOnSkmkbLo   # 161: Decreto 768 de 2025 y la PH (Revista PH, 2025)
+      - oIXLN9LfWeA   # 81: responsabilidad del administrador (Revista PH, 2022)
+    buyer_roles: [administrador, administradora, consejo de administración, consejero,
+                  consejera, presidente del consejo, revisor fiscal, contador, contadora]
+    # gmaps_queries: ["software propiedad horizontal Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["propiedadhorizontal"]   # Apify, untested
+
+  - tag: consultorios_odontologicos_esteticos # agendamiento, recordatorios, historia clínica light
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "auxiliar de odontología"                      # 23
+      - "asistente dental"                             # 20
+      # dropped: "recepcionista consultorio odontológico" (0 posts)
+    google_play_apps:
+      # Cusp Dental Software (50.000+, 86 1-2★ ratings)
+      - com.cherry_software.cuspDemo
+      # iDentist: Gestión Dental (50.000+, 42 1-2★ ratings)
+      - com.AvvaStyle.identist
+    youtube_video_ids:
+      - ONKIOnvE_f4   # 107: lo que debes tener al abrir tu consultorio dental (MX, 2020)
+      - skMXRpbMZi0   # 90: de cero pacientes a un consultorio exitoso (MX, 2019)
+      - GQ_jFIxIj5M   # 59: cómo tener un consultorio médico exitoso (2022)
+      - 68EbG1feNoY   # 25: estrategias para administrar tu consultorio (2023)
+    buyer_roles: [odontólogo, odontóloga, dentista, ortodoncista, endodoncista, médico estético,
+                  médica estética, esteticista, cosmetóloga, consultorio, clínica dental,
+                  clínica estética, centro de estética, auxiliar de odontología, recepcionista,
+                  negocio, emprendedor, emprendedora]
+    # gmaps_queries: ["software odontológico Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["odontologiacolombia"]   # Apify, untested
+
   - tag: talleres_mecanicos
-  - tag: inmobiliarias_arrendadores    # pequeñas inmobiliarias y arrendadores
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "jefe de taller automotriz"                    # 52
+      - "asesor de servicio automotriz"                # 215
+    google_play_apps:
+      # Gestión Taller Mecánico App (10.000+, 36 1-2★ ratings)
+      - com.miproyectogestiontaller
+    youtube_video_ids:
+      - yf8nJKNQ3fA   # 267: lo que he aprendido de tener mi propio taller (2023)
+      - ao8m2zR7l6Q   # 112: cómo cobrar en un taller mecánico (Innocar, 2025)
+      - OjC3c8wR1bI   # 111: administración de talleres, curso (Innocar, 2022)
+      - QfmppP668Tc   # 109: de mecánico a empresario (Innocar, 2025)
+    buyer_roles: [mecánico, taller, jefe de taller, técnico automotriz, latonero,
+                  pintor automotriz, electricista automotriz, negocio, emprendedor]
+    # gmaps_queries: ["software para talleres mecánicos Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["tallermecanico"]   # Apify, untested
+
+  - tag: inmobiliarias_arrendadores     # pequeñas inmobiliarias y arrendadores
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "asesor inmobiliario"                          # 315
+      - "auxiliar de arrendamientos"                   # 12
+    google_play_apps:
+      # FincaRaiz - Venta y Arriendo (1.000.000+, 12,314 1-2★ ratings); main CO listings
+      #   portal; renters and buyers review it too
+      - co.com.fincaraiz.app
+    youtube_video_ids:
+      - dcDFzwp4fhY   # 344: qué hacer si el arrendatario no paga (Derecho Inmobiliario, 2022)
+      - 0ZRUk23RpMg   # 300: ya no se requieren fiadores en Colombia (2022)
+      - _5HvD59UUr0   # 176: arrendar sin riesgos, como una inmobiliaria (2021)
+      - opw6wbc7asI   # 319: cómo abrir una inmobiliaria (2020)
+    buyer_roles: [inmobiliaria, agente inmobiliario, asesor inmobiliario, corredor, arrendador,
+                  arrendadora, propietario, propietaria, dueño, dueña, inversionista,
+                  administrador de inmuebles]
+    # gmaps_queries: ["inmobiliaria arriendos Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["inmobiliariacolombia"]   # Apify, untested
+
   - tag: transporte_carga_pequeno
-  - tag: jardines_colegios_pequenos    # jardines infantiles y colegios pequeños
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "despachador de carga"                         # 30
+      - "coordinador de tráfico transporte"            # 10
+    google_play_apps:
+      # RNDC Transportador (10.000+, 32 1-2★ ratings); RNDC, government cargo dispatch
+      #   registry
+      - co.gov.mintransporte.apprndc.transportador.co.gov.mintransporte.apprndc.transportador
+      # CargaRápido (10.000+, 36 1-2★ ratings)
+      - lt.cargo.cargarapido
+    youtube_video_ids:
+      - N-7q0U94T0Q   # 260: control de flota vehicular en Excel (2023)
+      - LyLkvkcswpI   # 1,860: costos de transporte (2019; probably MX)
+      - 2kNhyeWe1kE   # 233: estructura de costos de transporte (2020)
+      - poBtCql8UKI   # 227: camioneros y el precio del ACPM (Colombia.com, 2024)
+    buyer_roles: [transportador, transportadora, camionero, camión, tractomula, volqueta,
+                  furgón, conductor de carga, empresa de transporte, generador de carga,
+                  despachador, flota, propietario, propietaria]
+    # gmaps_queries: ["empresa de transporte de carga Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["camionerosdecolombia"]   # Apify, untested
+
+  - tag: jardines_colegios_pequenos     # jardines infantiles y colegios pequeños
+    # Draft note: YouTube: nothing Colombian found; both videos are thin.
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "docente preescolar"                           # 96
+      - "coordinadora jardín infantil"                 # 4
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - pQtbMuhoc_c   # 81: cómo abrir una guardería en casa (likely US, 2022)
+      - Bpj8Xmqv5Bg   # 43: cómo poner una guardería (2022)
+    buyer_roles: [rector, rectora, director, directora, coordinador, coordinadora,
+                  jardín infantil, colegio, institución educativa, dueño, dueña, propietario,
+                  propietaria, fundador, fundadora, administrador, administradora]
+    # gmaps_queries: ["software jardín infantil Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["jardininfantil"]   # Apify, untested
+
   - tag: veterinarias
+    # Draft note: YouTube: two small videos only; no 'dueño' in buyer_roles (pet owners are
+    # dueños).
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "médico veterinario"                           # 47
+      - "auxiliar veterinario"                         # 32
+    google_play_apps:
+      # Gestión Veterinaria (10.000+, 22 1-2★ ratings)
+      - com.dittal.volki
+    youtube_video_ids:
+      - SIdTyoblL08   # 37: emprendimiento veterinaria Pet Land (2021)
+      - CfRO6pcyho0   # 23: ¿es fácil abrir una veterinaria? (2018)
+    buyer_roles: [veterinario, veterinaria, médico veterinario, médica veterinaria,
+                  clínica veterinaria, consultorio veterinario, auxiliar veterinario, groomer,
+                  peluquería canina, pet shop, tienda de mascotas, negocio, emprendedor,
+                  emprendedora]
+    # gmaps_queries: ["software veterinario Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["veterinariacolombia"]   # Apify, untested
+
   - tag: droguerias_independientes
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "regente de farmacia"                          # 139
+      - "auxiliar de droguería"                        # 82
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - JMao7wX_5ck   # 51: cómo crear tu droguería, mi experiencia (2022)
+      - eZ45i_to5b4   # 47: cómo poner una farmacia (2023)
+      - 3aWCXt6kZos   # 42: 5 pasos para montar tu droguería (2020)
+      - -pPy_smvNHQ   # 29: requisitos para abrir una droguería (2021)
+    buyer_roles: [droguería, farmacia, droguista, regente, químico farmacéutico,
+                  auxiliar de farmacia, dependiente, propietario, propietaria, dueño, dueña,
+                  negocio, comerciante, emprendedor]
+    # gmaps_queries: ["distribuidora de medicamentos Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["drogueria"]   # Apify, untested
 
-  # 9-34: Computrabajo queries as given.
-  - tag: consultores_sst               # mandatory safety docs for many client companies, deadline-driven
-    computrabajo_queries: ["consultor SST", "coordinador SG-SST"]
-  - tag: ips_pequenas_facturacion_eps  # small clinics billing EPS: RIPS, glosas, cartera with insurers
-    computrabajo_queries: ["auxiliar de facturación salud", "glosas"]
-  - tag: fondos_empleados_cooperativas # credit and savings for members, regulated, often on Excel
-    computrabajo_queries: ["analista fondo de empleados"]
-  - tag: rutas_escolares               # routes, parent payments, monitoras
-    computrabajo_queries: ["monitora ruta escolar", "coordinador de rutas"]
-  - tag: gimnasios_boxes               # memberships, cobros mensuales, asistencia
-    computrabajo_queries: ["recepcionista gimnasio", "asesor comercial gimnasio"]
-  - tag: barberias_salones             # booking, no-shows, commissions per stylist
-    computrabajo_queries: ["recepcionista salón de belleza"]
-  - tag: confecciones_talleres         # Bogotá textile workshops: production orders, satélites, piecework pay
-    computrabajo_queries: ["jefe de producción confección", "control de calidad confección"]
-  - tag: distribuidores_tat            # wholesale distributors with preventa/ruteros to tiendas
-    computrabajo_queries: ["preventista", "vendedor TAT"]
-  - tag: abogados_independientes       # case tracking, court deadlines (términos), client billing
-    computrabajo_queries: ["asistente jurídico", "auxiliar judicial"]
-  - tag: psicologos_terapeutas         # scheduling, session notes, recurring payments
-    computrabajo_queries: ["asistente consultorio psicología"]
-  - tag: fisioterapia_rehabilitacion   # sessions per patient, EPS authorizations
-    computrabajo_queries: ["auxiliar fisioterapia"]
-  - tag: opticas                       # prescriptions, lab orders, follow-ups
-    computrabajo_queries: ["asesor óptica"]
-  - tag: panaderias_pasteleria_por_pedido   # custom orders, production planning, deposits
-    computrabajo_queries: ["auxiliar de pedidos pastelería"]
-  - tag: tiendas_instagram_whatsapp    # sellers who take orders by DM: pedidos, envíos, cobros
-    computrabajo_queries: ["community manager ventas WhatsApp", "auxiliar de despachos"]
-  - tag: importadores_pequenos         # landed cost, nacionalización, inventory
-    computrabajo_queries: ["auxiliar de comercio exterior", "auxiliar de importaciones"]
-  - tag: constructores_pequenos        # cotizaciones, control de obra, pagos a maestros
-    computrabajo_queries: ["residente de obra", "auxiliar de presupuestos"]
-  - tag: carpinterias_muebles_medida   # quotes, materials, production stages
-    computrabajo_queries: ["diseñador de muebles cotizaciones"]
-  - tag: empresas_aseo_servicios       # cleaning companies: shifts, nómina, client sites
-    computrabajo_queries: ["supervisor servicios generales", "programador de turnos"]
-  - tag: alquiler_equipos_eventos      # availability, deposits, damage
-    computrabajo_queries: ["coordinador logístico alquiler"]
-  - tag: organizadores_eventos_bodas   # budgets, vendor payments, timelines per event
-    computrabajo_queries: ["asistente de eventos", "wedding planner"]
-  - tag: fotografos_videografos        # bookings, deliveries, client galleries, cobros
-    computrabajo_queries: ["asistente fotógrafo eventos"]
-  - tag: academias_deportivas          # football/skating schools: mensualidades, asistencia, categorías
-    computrabajo_queries: ["coordinador escuela de fútbol"]
-  - tag: iglesias_fundaciones          # donations, members, event logistics; mostly Excel
-    computrabajo_queries: ["asistente administrativo fundación", "tesorería iglesia"]
-  - tag: hostales_fincas_turisticas    # reservations across channels, cleaning
-    computrabajo_queries: ["recepcionista hostal", "administrador finca turística"]
-  - tag: servicio_tecnico_celulares_electro   # repair shops: tickets, parts, warranty
-    computrabajo_queries: ["técnico de celulares", "recepción servicio técnico"]
-  - tag: mensajeria_motorizados        # small courier fleets: dispatch, proof of delivery, settlements
-    computrabajo_queries: ["coordinador de mensajería"]
+  - tag: consultores_sst                # mandatory safety docs for many client companies, deadline-driven
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "consultor SST"                                # 106
+      - "coordinador SG-SST"                           # 149
+    google_play_apps:
+      # HSEQ+ | Informes, auditoría, p (100.000+, 172 1-2★ ratings)
+      - no.mellora.hseq.free
+    youtube_video_ids:
+      - iuxcNLHnKmg   # 282: cómo diseñar un SG-SST (Javi_says, 2022)
+      - iRSPeV45on4   # 230: mi primer día en SST (Javi_says, 2022)
+      - A8O4NJL9ndc   # 15: abrir tu negocio de asesoría SST (2023)
+      - Rpg3WB0KxyE   # 15: ser un asesor SST que vuelvan a contratar (2020)
+    buyer_roles: [consultor, consultora, asesor, asesora, sst, coordinador, coordinadora,
+                  responsable del sg, empresa, empleador, gerente, negocio, contratista]
+    # gmaps_queries: ["asesoría SG-SST Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["sgsst"]   # Apify, untested
 
-  # 35: not a Computrabajo niche. Seed from LinkedIn/Twitter/communities; no collector reads
-  # those yet.
-  - tag: freelancers_tecnologia        # Colombian freelancers billing abroad: USD invoices, DIAN, cobros
+  - tag: ips_pequenas_facturacion_eps   # small clinics billing EPS: RIPS, glosas, cartera with insurers
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "auxiliar de facturación salud"                # 134
+      - "glosas"                                       # 48
+    google_play_apps:
+      # KafoMed: Historia Clínica PMS (500.000+, 237 1-2★ ratings)
+      - com.cliniconline
+    youtube_video_ids:
+      - Wj40qZT1uXQ   # 118: facturar una historia clínica sin experiencia (2020)
+      - U8C3cG2Nny0   # 64: sistema de facturación en salud, manuales SOAT/ISS (2020)
+      - MNS4YxvIg78   # 28: facturación de salud en Colombia, glosas (2020)
+      - hY3iygjxrIA   # 22: RIPS y facturación electrónica en salud (2024)
+    buyer_roles: [ips, prestador, clínica, consultorio, centro médico, laboratorio, facturador,
+                  facturadora, auxiliar de facturación, auditor, auditora, gerente,
+                  administrador, administradora, coordinador, coordinadora, médico, médica]
+    # gmaps_queries: ["software facturación salud RIPS Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["facturacionensalud"]   # Apify, untested
+
+  - tag: fondos_empleados_cooperativas  # credit and savings for members, regulated, often on Excel
+    # Draft note: YouTube: two searches found no video with 15+ comments; asociados are
+    # members, not buyers, so they are left out.
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "analista fondo de empleados"                  # 387
+      - "asesor de crédito cooperativa"                # 33
+    google_play_apps:
+      # Presente (50.000+, 225 1-2★ ratings); member app; reviewers are asociados
+      - co.com.presente
+      # FincoMóvil (100.000+, 158 1-2★ ratings); member app
+      - com.ionicframework.tabs842240
+      # Cooperativa Unimos (10.000+, 44 1-2★ ratings); member app
+      - co.unimosmovil.app
+    buyer_roles: [fondo de empleados, cooperativa, gerente, tesorero, tesorera, junta directiva,
+                  comité, analista, auxiliar contable, contador, contadora, revisor fiscal,
+                  administrador, administradora]
+    # gmaps_queries: ["software fondos de empleados Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["fondodeempleados"]   # Apify, untested
+
+  - tag: rutas_escolares                # routes, parent payments, monitoras
+    # Draft note: YouTube: two small videos; parents will dominate any comments.
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "coordinador de rutas"                         # 157
+      - "conductor ruta escolar"                       # 8
+      - "monitora de ruta"                             # 5
+      # dropped: "monitora ruta escolar" (2 posts)
+    google_play_apps:
+      # Bus esCool (50.000+, 69 1-2★ ratings); parents' tracking app
+      - com.busescool.usuario.panellateral
+    youtube_video_ids:
+      - z02GAgo0T0o   # 30: rutas escolares en Bogotá, regreso a clases (Caracol, 2020)
+      - s4bu6eDZv-g   # 23: cómo funciona una empresa de transporte especial (2017)
+    buyer_roles: [dueño, dueña, propietario, propietaria, conductor, conductora, monitora,
+                  monitor, coordinador, coordinadora, empresa de transporte, transportador,
+                  colegio, rector, rectora]
+    # gmaps_queries: ["transporte escolar Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["rutaescolar"]   # Apify, untested
+
+  - tag: gimnasios_boxes                # memberships, cobros mensuales, asistencia
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "asesor comercial gimnasio"                    # 45
+      - "instructor de gimnasio"                       # 5
+      # dropped: "recepcionista gimnasio" (0 posts)
+    google_play_apps:
+      # Trainingym (1.000.000+, 1,134 1-2★ ratings); gym-software member app; reviewers
+      #   are members
+      - com.Intelinova.TgApp
+    youtube_video_ids:
+      - p_MPz8dBiCI   # 162: cómo montar un gimnasio en 5 pasos (2018)
+      - 0WUcD-dQuaM   # 149: la economía de tener un gimnasio (2026)
+      - YvfRMqDwI4I   # 36: ¿es rentable poner un gimnasio en 2025?
+      - N6TpAP0UAI8   # 23: 5 errores que cometí al abrir mi gimnasio (2022)
+    buyer_roles: [dueño, dueña, propietario, propietaria, entrenador, entrenadora, coach,
+                  instructor, instructora, recepcionista, administrador, administradora,
+                  negocio, emprendedor, emprendedora]
+    # gmaps_queries: ["software para gimnasios Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["gimnasiocolombia"]   # Apify, untested
+
+  - tag: barberias_salones              # booking, no-shows, commissions per stylist
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "estilista"                                    # 8
+      - "barbero"                                      # 7
+      - "manicurista"                                  # 8
+      # dropped: "recepcionista salón de belleza" (0 posts)
+    google_play_apps:
+      # Goldie: Gestión de citas (500.000+, 312 1-2★ ratings); booking app used by barbers
+      #   and stylists
+      - com.appointfix
+    youtube_video_ids:
+      - a3ujrUC_9Jg   # 340: errores fatales al abrir una barbería (2023)
+      - kXlN0T86zf0   # 112: cómo llevar la contabilidad de una barber shop (2023)
+      - RaRgKow241s   # 29: qué frena las reservas de una barbería (2025)
+      - J1QX0ELJbbo   # 47: ser dueño de barbería sin ser barbero (2023)
+    buyer_roles: [barbero, barbera, estilista, peluquero, peluquera, manicurista, cosmetóloga,
+                  dueño, dueña, propietario, propietaria, negocio, emprendedor, emprendedora]
+    # gmaps_queries: ["software agenda barbería Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["barberiacolombia"]   # Apify, untested
+
+  - tag: confecciones_talleres          # Bogotá textile workshops: production orders, satélites, piecework pay
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "jefe de producción confección"                # 20
+      - "control de calidad confección"                # 27
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - I4XylXjnduY   # 393: cómo tener éxito iniciando mi taller de confección (2022)
+      - 7SPPQvBcop0   # 196: cómo empezar tu taller de costura (2022)
+      - i3KxWwWE-uE   # 24: plataformas que ponen en peligro la industria textil en Colombia (2025)
+    buyer_roles: [confeccionista, confección, taller, satélite, modista, costurera, fabricante,
+                  marca de ropa, dueño, dueña, propietario, propietaria, jefe de producción,
+                  empresa textil, textil, negocio, emprendedor, emprendedora]
+    # gmaps_queries: ["proveedor de telas Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["confeccioncolombia"]   # Apify, untested
+
+  - tag: distribuidores_tat             # wholesale distributors with preventa/ruteros to tiendas
+    # Draft note: YouTube: two searches found only generic sales videos; no 'dueño'
+    # (tenderos are the distributor's clients).
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "preventista"                                  # 8,071
+      - "vendedor TAT"                                 # 556
+      # note: 'preventista' matches far more than distributors (8k posts)
+    google_play_apps:
+      # Handy: Preventa Ventas Reparto (50.000+, 145 1-2★ ratings)
+      - com.locus.handy
+      # TOMAPEDIDOS-GESTIÓN VENDEDORES (50.000+, 10 1-2★ ratings); few low ratings
+      - net.comtor.tomapedidosmovil
+    buyer_roles: [distribuidor, distribuidora, mayorista, preventista, preventa, rutero,
+                  autoventa, vendedor, vendedora, supervisor de ventas, gerente, empresa]
+    # gmaps_queries: ["distribuidora mayorista Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["preventa"]   # Apify, untested
+
+  - tag: abogados_independientes        # case tracking, court deadlines (términos), client billing
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "asistente jurídico"                           # 102
+      - "auxiliar judicial"                            # 21
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - 093myRdYjB8   # 111: cómo conseguir clientes para abogados (2020)
+      - SMiaAtsqwWI   # 30: consejos para ser abogado independiente (Ecuador, 2021)
+      - VRwMJxYXW9I   # 26: cómo ganar dinero como abogado (2022)
+    buyer_roles: [abogado, abogada, litigante, firma de abogados, bufete, dependiente judicial,
+                  asistente jurídico, auxiliar judicial, apoderado, apoderada]
+    # gmaps_queries: ["software jurídico abogados Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["abogadoscolombia"]   # Apify, untested
+
+  - tag: psicologos_terapeutas          # scheduling, session notes, recurring payments
+    # Draft note: YouTube: most psychology videos draw patients and students, not practice
+    # owners.
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "psicólogo clínico"                            # 15
+      # dropped: "asistente consultorio psicología" (1 posts)
+    google_play_apps:
+      # Consultorio (100.000+, 117 1-2★ ratings); agenda for health professionals
+      - me.consultorio
+    youtube_video_ids:
+      - mLdVIz8syAU   # 117: ¿cuánto gana el psicólogo de internet? (2024)
+      - XqzlBOTZNzY   # 285: en qué puede trabajar un psicólogo (2020)
+    buyer_roles: [psicólogo, psicóloga, terapeuta, psicoterapeuta, psiquiatra, consultorio,
+                  profesional de salud mental]
+    # gmaps_queries: ["centro de psicología Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["psicologocolombia"]   # Apify, untested
+
+  - tag: fisioterapia_rehabilitacion    # sessions per patient, EPS authorizations
+    # Draft note: YouTube: two searches found only exercise videos for patients and student
+    # advice.
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "auxiliar fisioterapia"                        # 6
+      - "fisioterapeuta"                               # 40
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    buyer_roles: [fisioterapeuta, terapeuta, kinesiólogo, kinesióloga, terapeuta ocupacional,
+                  fonoaudiólogo, fonoaudióloga, centro de rehabilitación, consultorio, ips,
+                  auxiliar de fisioterapia]
+    # gmaps_queries: ["centro de fisioterapia Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["fisioterapiacolombia"]   # Apify, untested
+
+  - tag: opticas                        # prescriptions, lab orders, follow-ups
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "asesor óptica"                                # 31
+      - "optómetra"                                    # 30
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - ET4_OHkhsLQ   # 104: me fui a la quiebra, ¿abrir una óptica deja dinero? (2023)
+      - FsOryXhPJZk   # 236: qué es un óptico optometrista (2018)
+    buyer_roles: [óptica, óptico, optómetra, optometrista, laboratorio óptico, asesor óptico,
+                  asesora óptica, dueño, dueña, propietario, propietaria, negocio]
+    # gmaps_queries: ["laboratorio óptico Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["opticacolombia"]   # Apify, untested
+
+  - tag: panaderias_pasteleria_por_pedido # custom orders, production planning, deposits
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "auxiliar de pastelería"                       # 46
+      - "panadero"                                     # 174
+      # dropped: "auxiliar de pedidos pastelería" (5 posts)
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - aFePSBs1ZO8   # 945: cómo sacar costos de una receta y el precio de venta (2022)
+      - sMldpxVaTJg   # 456: costear una receta de pastelería en Excel (2022)
+      - qer3sBUweUc   # 410: cómo cobrar mis productos de repostería (2020)
+      - -H-MiJhcljQ   # 205: 8 claves para emprender en pastelería (2022)
+    buyer_roles: [pastelera, pastelero, repostera, repostero, panadero, panadera, panadería,
+                  pastelería, repostería, emprendedor, emprendedora, negocio, dueño, dueña,
+                  vendedor, vendedora]
+    # gmaps_queries: ["insumos de repostería Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["reposteriacolombia"]   # Apify, untested
+
+  - tag: tiendas_instagram_whatsapp     # sellers who take orders by DM: pedidos, envíos, cobros
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "asesor de ventas whatsapp"                    # 271
+      - "vendedor redes sociales"                      # 123
+      - "auxiliar de despachos"                        # 697
+      # dropped: "community manager ventas WhatsApp" (2 posts)
+      # note: 'auxiliar de despachos' is generic warehouse work
+    google_play_apps:
+      # WhatsApp Business (1.000.000.000+, 1,212,438 1-2★ ratings); the sellers' own tool;
+      #   300 reviews a run cap volume
+      - com.whatsapp.w4b
+    youtube_video_ids:
+      - kh_5M-C-J-Y   # 414: vender más por redes sociales, Mentores Emprendedores (CO, 2023)
+      - 024We7xyBfM   # 101: cómo vender por Instagram desde cero (CO, 2023)
+      - 06hT0y5ncDI   # 192: vender por Instagram con pocos seguidores (2022)
+      - _aOnW9mB_Vs   # 161: WhatsApp como herramienta de ventas (2026)
+    buyer_roles: [emprendedor, emprendedora, emprendimiento, vendedor, vendedora, tienda,
+                  negocio, marca, dueño, dueña, community manager, comerciante]
+    # gmaps_queries: ["empresa de mensajería para emprendedores Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["emprendimientocolombia"]   # Apify, untested
+
+  - tag: importadores_pequenos          # landed cost, nacionalización, inventory
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "auxiliar de comercio exterior"                # 121
+      - "auxiliar de importaciones"                    # 228
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - -JAHXZQa2uM   # 175: cómo importar de China a Colombia en 2026
+      - H1k-fBkA1mE   # 167: 7 pasos para importar de China a Colombia (2024)
+      - 4WlUrg5laTA   # 151: el proceso aduanero en Colombia paso a paso (2025)
+      - BD5Qyv1A-m0   # 79: impuestos al importar de China a Colombia (2025)
+    buyer_roles: [importador, importadora, importaciones, comercializadora, agente de aduanas,
+                  agencia de aduanas, comercio exterior, emprendedor, emprendedora, negocio,
+                  empresa, comerciante, distribuidor]
+    # gmaps_queries: ["agencia de aduanas Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["importacionesdechina"]   # Apify, untested
+
+  - tag: constructores_pequenos         # cotizaciones, control de obra, pagos a maestros
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "residente de obra"                            # 651
+      - "auxiliar de presupuestos"                     # 98
+    google_play_apps:
+      # Presupuesto Obra Construcción (10.000+, 95 1-2★ ratings)
+      - com.britetodo.costestimator
+    youtube_video_ids:
+      - n2mbtVdOJ04   # 317: cómo sacar el presupuesto de obra del primer piso (2020)
+      - zXMPp8FDZv8   # 229: cómo hacer un presupuesto de obra (2021)
+      - _hClk0guzlE   # 146: cómo hacer un presupuesto de construcción (2022)
+      - o4K8Rk5KVuc   # 49: costo de un trabajador en 2025 en Colombia
+    buyer_roles: [constructor, constructora, contratista, maestro de obra, residente de obra,
+                  ingeniero civil, ingeniera civil, arquitecto, arquitecta, remodelaciones,
+                  empresa, negocio]
+    # gmaps_queries: ["depósito de materiales de construcción Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["construccioncolombia"]   # Apify, untested
+
+  - tag: carpinterias_muebles_medida    # quotes, materials, production stages
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "carpintero"                                   # 52
+      - "ebanista"                                     # 46
+      # dropped: "diseñador de muebles cotizaciones" (1 posts)
+    google_play_apps:
+      # CutList Optimizer (1.000.000+, 1,319 1-2★ ratings); board cutting plans
+      - com.cutlistoptimizer
+      # SketchCut (1.000.000+, 561 1-2★ ratings)
+      - com.fortali.mapcut
+    youtube_video_ids:
+      - WXTlsGrDEyc   # 2,138: presupuestar trabajos de carpintería (2016)
+      - 4QqANyZx2S8   # 135: cuánto cobrar por tus trabajos de carpintería (2024)
+      - DSOdQzv2dcQ   # 65: presupuesto para muebles de melamina (2021)
+      - rnj1fIqRaWM   # 102: cómo cotizar una cocina (2020)
+    buyer_roles: [carpintero, carpintera, carpintería, ebanista, mueblería,
+                  fabricante de muebles, diseñador de muebles, diseñadora de muebles, taller,
+                  negocio, emprendedor, dueño, dueña]
+    # gmaps_queries: ["corte de tableros melamina Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["carpinteriacolombia"]   # Apify, untested
+
+  - tag: empresas_aseo_servicios        # cleaning companies: shifts, nómina, client sites
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "supervisor servicios generales"               # 178
+      - "programador de turnos"                        # 38
+    google_play_apps:
+      # Control horario (500.000+, 119 1-2★ ratings); time tracking; reviewers are mostly
+      #   employees
+      - com.bixpe.chronos
+    youtube_video_ids:
+      - kyxXhs8D90U   # 112: cómo formar una empresa de servicios generales (2021)
+      - OqVF3aiU0VE   # 57: cómo poner una empresa de limpieza (2023)
+      - 3FOTOUcQNXY   # 24: cómo conseguir clientes para una empresa de limpieza (2023)
+    buyer_roles: [empresa de aseo, empresa de limpieza, supervisor, supervisora, coordinador,
+                  coordinadora, programador de turnos, gerente, dueño, dueña, contratista,
+                  negocio]
+    # gmaps_queries: ["empresa de aseo Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["empresadeaseo"]   # Apify, untested
+
+  - tag: alquiler_equipos_eventos       # availability, deposits, damage
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "alquiler de equipos"                          # 85
+      - "coordinador logístico alquiler"               # 5
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - Ztj_aiT4rFA   # 198: mobiliario para iniciar un negocio de decoración (2023)
+      - HxiwJfM7ua8   # 79: 26 negocios de alquiler para fiestas (2021)
+      - 9GwxFeGnUIM   # 52: así funciona la renta de equipo para fiestas (2020)
+    buyer_roles: [alquiler, alquiladora, empresa de alquiler, negocio, dueño, dueña,
+                  propietario, propietaria, emprendedor, emprendedora, decorador, decoradora,
+                  organizador, organizadora]
+    # gmaps_queries: ["alquiler de sillas y mesas Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["alquilerdemobiliario"]   # Apify, untested
+
+  - tag: organizadores_eventos_bodas    # budgets, vendor payments, timelines per event
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "asistente de eventos"                         # 245
+      - "coordinador de eventos"                       # 232
+      # dropped: "wedding planner" (0 posts)
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - TvpJIzw9sxY   # 147: qué hace un organizador de eventos, wedding planner (2019)
+      - zFidoPZhBhw   # 140: crear un negocio de organización de eventos (2019)
+      - YBuf1q3z1e8   # 36: cómo cobrar la organización de eventos (2020)
+    buyer_roles: [organizador, organizadora, wedding planner, planner, event planner, decorador,
+                  decoradora, coordinador de eventos, coordinadora de eventos,
+                  empresa de eventos, negocio, emprendedor, emprendedora]
+    # gmaps_queries: ["wedding planner Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["weddingplannercolombia"]   # Apify, untested
+
+  - tag: fotografos_videografos         # bookings, deliveries, client galleries, cobros
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "fotógrafo"                                    # 18
+      - "editor de video"                              # 14
+      # dropped: "asistente fotógrafo eventos" (0 posts)
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - rzVz7c9Ra7k   # 566: cómo cobrar fotografía de bodas y retratos (2019)
+      - C8s4Bim3faE   # 152: conseguir clientes siendo fotógrafo, cuánto cobrar (2022)
+      - qcPlH21cog4   # 100: cuánto cobrar por una sesión en 2025
+      - C-zY3JESaeM   # 74: cuánto cobrar por mis fotografías (2022)
+    buyer_roles: [fotógrafo, fotógrafa, videógrafo, videógrafa, camarógrafo,
+                  estudio fotográfico, editor, editora, negocio, emprendedor, emprendedora]
+    # gmaps_queries: ["estudio fotográfico Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["fotografodebodas"]   # Apify, untested
+
+  - tag: academias_deportivas           # football/skating schools: mensualidades, asistencia, categorías
+    # Draft note: YouTube: two searches gave one relevant video (Peru).
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "entrenador deportivo"                         # 24
+      # dropped: "coordinador escuela de fútbol" (0 posts)
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - n0vOKP0mvNI   # 334: la triste realidad de las academias de fútbol (Perú, 2026)
+    buyer_roles: [entrenador, entrenadora, profesor, profesora, director deportivo,
+                  directora deportiva, coordinador, coordinadora, escuela de fútbol,
+                  escuela deportiva, club, academia, dueño, dueña, fundador, fundadora]
+    # gmaps_queries: ["escuela de fútbol Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["escueladefutbol"]   # Apify, untested
+
+  - tag: iglesias_fundaciones           # donations, members, event logistics; mostly Excel
+    # Draft note: YouTube: small videos only; 'iglesia' and 'fundación' left out (members
+    # match too).
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "asistente administrativo fundación"           # 15
+      - "auxiliar contable fundación"                  # 11
+      # dropped: "tesorería iglesia" (0 posts)
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - po7kmbGUFJU   # 20: Ekklesia, software administrativo para iglesias (2023)
+      - S2gGpQa6XFA   # 18: formato para llevar la tesorería de la iglesia (2018)
+      - zwthjLSPyP4   # 17: app para las finanzas de la iglesia (2022)
+    buyer_roles: [pastor, pastora, líder, tesorero, tesorera, secretario, secretaria,
+                  ministerio, ong, director, directora, administrador, administradora, contador,
+                  contadora, sacerdote, párroco]
+    # gmaps_queries: ["software para iglesias Colombia"]   # Apify, untested
+    # tiktok_hashtags: ["iglesiacristiana"]   # Apify, untested
+
+  - tag: hostales_fincas_turisticas     # reservations across channels, cleaning
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "recepcionista hostal"                         # 23
+      - "administrador de hostal"                      # 30
+      # dropped: "administrador finca turística" (0 posts)
+    google_play_apps:
+      # Pulse para Booking.com (1.000.000+, 7,777 1-2★ ratings); Booking.com's app for
+      #   property hosts
+      - com.booking.hotelmanager
+    youtube_video_ids:
+      - MSrbSNDNtgE   # 215: cómo iniciar en Airbnb en Colombia (2023)
+      - rkUJ8FV7570   # 81: requisitos legales para anfitriones Airbnb en Colombia (2021)
+      - Q-9HZLYrt60   # 327: qué cambia para quienes alquilan en Airbnb y Booking (Blu, 2026)
+      - Ehz6Y71w934   # 64: Airbnb no es fácil, la verdad de las rentas cortas (2025)
+    buyer_roles: [anfitrión, anfitriona, host, propietario, propietaria, dueño, dueña,
+                  administrador, administradora, hotelero, hotelera, recepcionista, negocio,
+                  emprendedor, emprendedora]
+    # gmaps_queries: ["hostal Cartagena"]   # Apify, untested
+    # tiktok_hashtags: ["airbnbcolombia"]   # Apify, untested
+
+  - tag: servicio_tecnico_celulares_electro # repair shops: tickets, parts, warranty
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "técnico de celulares"                         # 157
+      - "recepción servicio técnico"                   # 549
+    google_play_apps: []   # no fitting app with enough 1-2 star ratings
+    youtube_video_ids:
+      - qkzjBaZAJic   # 164: consejos para abrir tu taller de reparación (2022)
+      - oFzYMRvEwZE   # 467: ruta para ser técnico de celulares (2023)
+      - HijcwCW9kHE   # 379: herramientas para iniciar a reparar celulares (2021)
+    buyer_roles: [técnico, técnica, reparador, servicio técnico, taller, dueño, dueña, negocio,
+                  emprendedor, local de celulares, vendedor de celulares]
+    # gmaps_queries: ["repuestos para celulares Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["reparaciondecelulares"]   # Apify, untested
+
+  - tag: mensajeria_motorizados         # small courier fleets: dispatch, proof of delivery, settlements
+    # Draft note: YouTube: other results were riders on apps (employees, not buyers).
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "coordinador de mensajería"                    # 20
+      - "mensajero motorizado"                         # 155
+      # note: riders are employees; the count shows courier hiring, not owners
+    google_play_apps:
+      # Mensajeros Urbanos Cliente (100.000+, 872 1-2★ ratings); business clients of a CO
+      #   courier platform
+      - co.mensajerosurbanos.app.cliente
+      # Moova, app para mensajeros (100.000+, 97 1-2★ ratings); riders' app
+      - com.moova.moover
+    youtube_video_ids:
+      - uFITeCh1x4E   # 386: de mensajero en bicicleta a dueño de una empresa de envíos (2022)
+    buyer_roles: [empresa de mensajería, mensajería, coordinador, coordinadora, despachador,
+                  despachadora, dueño, dueña, gerente, negocio, flota, operador logístico]
+    # gmaps_queries: ["empresa de mensajería Bogotá"]   # Apify, untested
+    # tiktok_hashtags: ["mensajeriacolombia"]   # Apify, untested
+
+  - tag: freelancers_tecnologia         # Colombian freelancers billing abroad: USD invoices, DIAN, cobros
+    computrabajo_queries:   # posts in the last 30 days, 3 cities (2026-11-10)
+      - "desarrollador freelance"                      # 104
+      - "desarrollador prestación de servicios"        # 61
+      # note: posts are companies hiring freelancers, a way to reach them
+    google_play_apps:
+      # Meru: Cuenta en dólares (1.000.000+, 3,608 1-2★ ratings)
+      - com.getmeru.app
+      # Upwork (10.000.000+, 24,411 1-2★ ratings)
+      - com.upwork.android.apps.main
+      # Wise (50.000.000+, 75,456 1-2★ ratings)
+      - com.transferwise.android
+    youtube_video_ids:
+      - mAMN6Q6rYPY   # 481: así trabajo remoto desde Colombia (2024)
+      - qyNxBKWuxL0   # 137: cómo declarar ingresos del extranjero (2020)
+      - yJnfo1AQYl8   # 81: impuestos al trabajar remoto (2023)
+      - G_PiZwLGiCA   # 29: traer dinero a Colombia con Payoneer (2026)
+    buyer_roles: [freelancer, freelance, independiente, desarrollador, desarrolladora,
+                  programador, programadora, diseñador, diseñadora, consultor, consultora,
+                  contratista, trabajador remoto, nómada digital, persona natural,
+                  prestador de servicios]
+    # tiktok_hashtags: ["freelancecolombia"]   # Apify, untested

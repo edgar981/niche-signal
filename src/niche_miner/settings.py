@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import date
 from pathlib import Path
 from typing import Any, Literal
 
@@ -113,7 +114,10 @@ class ClusterSettings(BaseModel):
 
 class ScoreWeights(BaseModel):
     frequency: float = 30
-    frequency_saturation: int = Field(50, ge=1)
+    frequency_doc_cap: int = Field(30, ge=1)  # authors per document that count toward the sum
+    frequency_ceiling: float = Field(15, gt=0)  # sum that earns full points (`calibrate`)
+    frequency_recalibrated_at: date | None = None  # when `calibrate` last set the ceiling
+    frequency_saturation: int = Field(50, ge=1)  # only for the old author-count comparison
     spend: float = 30
     b2b: float = 20
     reachability: float = 20

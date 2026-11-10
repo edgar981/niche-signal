@@ -36,9 +36,10 @@ class ClusterStats:
     known_role: int = 0  # pains whose writer is known to be a business or a consumer
     distinct_urls: int = 0  # source documents: videos, app listings, places, posts
     distinct_sources: int = 0
-    url_spread: float = 0.0  # Σ over source documents of ln(1 + distinct authors there)
+    url_spread: float = 0.0  # Σ_document min(ln(1 + authors there), ln(1 + doc cap))
     top_url: str | None = None  # the document with the most pains
     top_url_count: int = 0
+    cap_hits: int = 0  # documents with at least frequency_doc_cap authors
 
     @property
     def top_url_share(self) -> float:
@@ -48,7 +49,7 @@ class ClusterStats:
 @dataclass(frozen=True)
 class Breakdown:
     frequency: float
-    frequency_old: float  # previous formula, ln(1 + distinct authors), kept for comparison
+    frequency_old: float  # author-count formula, ln(1 + distinct authors), for comparison
     spend: float
     b2b: float
     b2b_share: float  # business share used: among known roles, or the global prior
@@ -60,6 +61,9 @@ class Breakdown:
     competition: float  # points subtracted
     total: float
     total_old_frequency: float  # the same score with the old frequency formula
+    freq_sum: float = 0.0  # the capped per-document sum (= stats.url_spread)
+    cap_hits: int = 0
+    above_ceiling: bool = False  # freq_sum ≥ frequency_ceiling: full frequency points
 
 
 def _clamp(x: float, lo: float, hi: float) -> float:
@@ -85,6 +89,7 @@ def compute_stats(members: Sequence[Mapping[str, Any]], w: ScoreWeights) -> Clus
     roles = [_role(m) for m in scored]
     weights = [w.pain_type_weights.get(m["pain_type"] or "", 1.0) for m in scored]
     top = pains_by_url.most_common(1)
+    cap = math.log1p(w.frequency_doc_cap)
     return ClusterStats(
         size=len(scored), distinct_authors=len(set(author.values())),
         spend_count=sum(1 for m in scored if m["spend_signal"]),
@@ -93,20 +98,22 @@ def compute_stats(members: Sequence[Mapping[str, Any]], w: ScoreWeights) -> Clus
         excluded=len(members) - len(scored),
         known_role=sum(1 for r in roles if r in ("business", "consumer")),
         distinct_urls=len(by_url), distinct_sources=len({m["source"] for m in scored}),
-        url_spread=sum(math.log1p(len(a)) for a in by_url.values()),
-        top_url=top[0][0] if top else None, top_url_count=top[0][1] if top else 0)
+        url_spread=sum(min(math.log1p(len(a)), cap) for a in by_url.values()),
+        top_url=top[0][0] if top else None, top_url_count=top[0][1] if top else 0,
+        cap_hits=sum(1 for a in by_url.values() if len(a) >= w.frequency_doc_cap))
 
 
 def compute_score(stats: ClusterStats, reachability: float, competition: float,
                   w: ScoreWeights, b2b_prior: float = 0.0) -> Breakdown:
     n = max(stats.size, 1)
-    saturation = math.log1p(w.frequency_saturation)
-    frequency = w.frequency * min(1.0, stats.url_spread / saturation)
-    frequency_old = w.frequency * min(1.0, math.log1p(stats.distinct_authors) / saturation)
+    frequency = w.frequency * min(1.0, stats.url_spread / w.frequency_ceiling)
+    frequency_old = w.frequency * min(1.0, math.log1p(stats.distinct_authors)
+                                      / math.log1p(w.frequency_saturation))
     spend = w.spend * stats.spend_count / n
     known = stats.known_role / n
-    insufficient = stats.size == 0 or known < w.b2b_min_known_share
-    share = b2b_prior if insufficient else stats.business_count / stats.known_role
+    off = w.b2b == 0  # weight 0: the component is off, so no prior and no flag
+    insufficient = not off and (stats.size == 0 or known < w.b2b_min_known_share)
+    share = 0.0 if off else b2b_prior if insufficient else stats.business_count / stats.known_role
     b2b = w.b2b * share
     reach_pts = w.reachability * _clamp(reachability, 0, 10) / 10
     comp_pts = w.competition * _clamp(competition, 0, 10) / 10
@@ -118,7 +125,8 @@ def compute_score(stats: ClusterStats, reachability: float, competition: float,
     return Breakdown(r(frequency), r(frequency_old), r(spend), r(b2b), round(share, 3),
                      round(known, 3), insufficient, round(stats.type_weight, 2),
                      r((frequency + spend + b2b) * stats.type_weight), r(reach_pts), r(comp_pts),
-                     r(total(frequency)), r(total(frequency_old)))
+                     r(total(frequency)), r(total(frequency_old)), round(stats.url_spread, 2),
+                     stats.cap_hits, stats.url_spread >= w.frequency_ceiling)
 
 
 def formula_markdown(w: ScoreWeights) -> str:
@@ -127,14 +135,18 @@ def formula_markdown(w: ScoreWeights) -> str:
         "```",
         "score = clamp(evidence + reachability - competition, 0, 100)",
         "  evidence     = (frequency + spend + b2b) × type_weight",
-        f"  frequency    = {w.frequency:g} × min(1, Σ_document ln(1 + authors_document) / "
-        f"ln(1 + {w.frequency_saturation}))",
+        f"  frequency    = {w.frequency:g} × min(1, Σ_document min(ln(1 + authors_document), "
+        f"ln(1 + {w.frequency_doc_cap})) / {w.frequency_ceiling:g})",
+        f"                 (ceiling {w.frequency_ceiling:g}: " + (
+            f"calibrated {w.frequency_recalibrated_at}" if w.frequency_recalibrated_at
+            else "set by hand, `niche-miner calibrate` not run yet") + ")",
         f"                 (old, for comparison: {w.frequency:g} × min(1, ln(1 + distinct_authors)"
         f" / ln(1 + {w.frequency_saturation})))",
         f"  spend        = {w.spend:g} × pains_with_spend_signal / pains",
-        f"  b2b          = {w.b2b:g} × business_pains / pains_with_known_role",
-        f"                 (global prior instead when under {w.b2b_min_known_share:.0%} of pains "
-        "have a known role)",
+        *(["  b2b          = 0 (off: weight 0 in settings)"] if w.b2b == 0 else [
+            f"  b2b          = {w.b2b:g} × business_pains / pains_with_known_role",
+            f"                 (global prior instead when under {w.b2b_min_known_share:.0%} of "
+            "pains have a known role)"]),
         f"  type_weight  = mean pain-type weight of the cluster's pains ({weights or 'none'}; "
         "other types 1)",
         f"  reachability = {w.reachability:g} × reachability / 10    "
@@ -179,9 +191,10 @@ def _auto_part(auto: Mapping[str, Any], part: str) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-def score_latest(conn: sqlite3.Connection, config_dir: Path, w: ScoreWeights,
-                 review_dir: Path | None = None) -> list[dict]:
-    """Recompute metrics and scores for the latest run of every niche. Idempotent."""
+def resolve_groups(conn: sqlite3.Connection, config_dir: Path
+                   ) -> tuple[list[sqlite3.Row], dict, dict[int, int], dict[int, list[int]]]:
+    """Latest clusters, overrides, and each cluster's owner after merges (merges.yaml plus
+    `merged_into:` statuses), with the member clusters of every owner."""
     clusters = db.latest_clusters(conn)
     current = {c["id"] for c in clusters if not c["is_noise"]}
     overrides, status_merges, warnings = reviews.load_overrides(
@@ -195,6 +208,13 @@ def score_latest(conn: sqlite3.Connection, config_dir: Path, w: ScoreWeights,
     groups: dict[int, list[int]] = defaultdict(list)
     for cid, target in owner.items():
         groups[target].append(cid)
+    return clusters, overrides, owner, groups
+
+
+def score_latest(conn: sqlite3.Connection, config_dir: Path, w: ScoreWeights,
+                 review_dir: Path | None = None) -> list[dict]:
+    """Recompute metrics and scores for the latest run of every niche. Idempotent."""
+    clusters, overrides, owner, groups = resolve_groups(conn, config_dir)
     priors = _b2b_priors(conn, clusters, w)
     niches = load_niches(config_dir)
     niche_auto = {c["niche_tag"]: reviews.load_niche_auto(review_dir, c["niche_tag"])
@@ -239,6 +259,8 @@ def score_latest(conn: sqlite3.Connection, config_dir: Path, w: ScoreWeights,
                                                            or reach_auto < w.no_audience_below),
                 "distinct_urls": stats.distinct_urls, "distinct_sources": stats.distinct_sources,
                 "url_spread": round(stats.url_spread, 2), "top_url": stats.top_url,
+                "frequency_ceiling": w.frequency_ceiling,
+                "frequency_doc_cap": w.frequency_doc_cap,
                 "top_url_count": stats.top_url_count, "top_url_share": round(stats.top_url_share, 3),
                 "known_role": stats.known_role, "business_count": stats.business_count,
                 "b2b_prior": round(prior, 3),

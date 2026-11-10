@@ -92,6 +92,12 @@ Then:
 Cluster ids are global: a new `cluster` run creates new ids, so overrides and the review cache
 stop matching after re-clustering (`review` runs again for the new ids).
 
+Frequency is 30 × min(1, sum / `scoring.frequency_ceiling`), where the sum adds
+min(ln(1 + authors), ln(31)) per document. The ceiling is 15 by hand until
+`uv run niche-miner calibrate` (`--dry-run` to preview) sets it to the 90th percentile of the
+cluster sums across all niches. Run it once, after the 35-niche Computrabajo pass, then
+`score` and `report`. After that the ceiling stays fixed: a second run needs `--force`.
+
 ## Config
 
 - `config/niches.yaml` — seeds per niche; each collector reads only its own key.

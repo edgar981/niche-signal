@@ -65,6 +65,14 @@ def _num(x: float | None) -> str:
     return f"{x:.1f}" if x is not None else "—"
 
 
+def freq_cell(b: dict) -> str:
+    """'13.1', '35.0 ▲' (at or above the ceiling), plus documents at the per-document cap."""
+    if "freq_sum" not in b:
+        return "—"
+    out = f"{b['freq_sum']:.1f}" + (" ▲" if b.get("above_ceiling") else "")
+    return out + (f" ({b['cap_hits']} at cap)" if b.get("cap_hits") else "")
+
+
 def top_table(top: Sequence[sqlite3.Row], rk: Ranks, cfg: ReportSettings) -> list[str]:
     lines = ["| # | id | theme | score | old freq. | co-only | docs · sources | top doc "
              "| reach | comp. | flags |",
@@ -88,16 +96,17 @@ def all_clusters(ranked: Sequence[sqlite3.Row], clusters: Sequence[sqlite3.Row],
     if not clusters:
         return []
     lines = ["## All clusters in the latest run", "",
-             "| id | label | status | pains | docs | sources | top doc | authors | spend | b2b "
-             "| reach | comp. | score | old freq. | co-only |",
-             "|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---|---|---:|---:|---:|"]
+             "| id | label | status | pains | docs | sources | top doc | authors | freq. sum "
+             "| spend | b2b | reach | comp. | score | old freq. | co-only |",
+             "|---:|---|---|---:|---:|---:|---:|---:|---|---:|---:|---|---|---:|---:|---:|"]
     for c in ranked:
         b = bd(c)
         b2b = "insufficient" if b.get("b2b_insufficient") else f"{c['b2b_ratio']:.0%}"
         lines.append(
             f"| {c['id']} | {cell(c['label'])} | {b.get('status', 'active')} | {c['size']} | "
             f"{b.get('distinct_urls', 0)} | {b.get('distinct_sources', 0)} | "
-            f"{b.get('top_url_share', 0):.0%} | {c['distinct_authors']} | {c['spend_count']} | "
+            f"{b.get('top_url_share', 0):.0%} | {c['distinct_authors']} | {freq_cell(b)} | "
+            f"{c['spend_count']} | "
             f"{b2b} | {value_cell(b, 'reachability')} | {value_cell(b, 'competition')} | "
             f"{c['score']:.1f} | {_num(b.get('total_old_frequency'))} | {_num(co_total(c))} |")
     for c in clusters:
@@ -110,8 +119,10 @@ def all_clusters(ranked: Sequence[sqlite3.Row], clusters: Sequence[sqlite3.Row],
         else:
             continue
         lines.append(f"| {c['id']} | _{cell(c['label'])}_ | {note} | {c['size']} | | | | "
-                     f"{c['distinct_authors']} | {c['spend_count']} | | | | | | |")
-    return lines + [""]
+                     f"{c['distinct_authors']} | | {c['spend_count']} | | | | | | |")
+    return lines + ["", "_freq. sum_ is Σ over documents of min(ln(1 + authors), ln(1 + doc "
+                    "cap)); ▲ means it reaches the frequency ceiling (full points); _at cap_ "
+                    "counts documents whose authors hit the per-document cap.", ""]
 
 
 def _auto_note(b: dict) -> str:

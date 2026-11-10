@@ -49,7 +49,11 @@ def test_report_sections(conn, tmp_path, settings):
     md = path.read_text(encoding="utf-8")
 
     assert path.name == "2026-11-08.md"
-    assert "## Scoring formula" in md and "Σ_document ln(1 + authors_document)" in md
+    assert "## Scoring formula" in md
+    assert "Σ_document min(ln(1 + authors_document), ln(1 + 30)) / 15" in md
+    assert "| id | label | status | pains | docs | sources | top doc | authors | freq. sum |" in md
+    assert "Σ min(ln(1 + authors per document), ln(1 + 30)) = " in md
+    assert "below the ceiling 15; 0 document(s) at the 30-author cap" in md
     assert md.index("Conciliación bancaria") < md.index("Pedidos por WhatsApp")  # ranked
     assert "| # | id | theme | score | old freq. | co-only |" in md  # top table
     assert md.count("**Hypothesis:**") == 2

@@ -175,7 +175,19 @@ def _input(b: dict, part: str) -> str:
     return f"{shown} ({auto_text}, {over_text})"
 
 
-def _b2b_input(b: dict, size: int, min_share: float) -> str:
+def _freq_input(b: dict, authors: int) -> str:
+    cap, ceiling = b.get("frequency_doc_cap", 30), b.get("frequency_ceiling")
+    hits = b.get("cap_hits", 0)
+    where = (("at or above" if b.get("above_ceiling") else "below") + f" the ceiling {ceiling:g}"
+             if ceiling is not None else "ceiling unknown (re-run `score`)")
+    return (f"{b.get('distinct_urls', 0)} documents, {authors} authors; Σ min(ln(1 + authors "
+            f"per document), ln(1 + {cap})) = {b.get('freq_sum', b.get('url_spread', 0)):.2f}, "
+            f"{where}; {hits} document(s) at the {cap}-author cap")
+
+
+def _b2b_input(b: dict, size: int, min_share: float, weight: float) -> str:
+    if weight == 0:
+        return "off (weight 0 in `config/settings.yaml`)"
     known = b.get("known_role", 0)
     if b.get("b2b_insufficient"):
         return (f"insufficient: {known} of {size} pains have a known role (under "
@@ -214,6 +226,7 @@ def _cluster_section(conn: sqlite3.Connection, c: sqlite3.Row, absorbed: list[in
     members = db.member_details(conn, [c["id"], *absorbed])
     scored = [m for m in members if not m["exclude_from_scoring"]]
     b = bd(c)
+    sw = settings.scoring
     size = c["size"] or 1
     by_source = ", ".join(f"{s} {n}" for s, n in Counter(m["source"] for m in scored).most_common())
     meta = (f"cluster `{c['id']}` · niche `{c['niche_tag']}` · {c['size']} pains · "
@@ -240,12 +253,11 @@ def _cluster_section(conn: sqlite3.Connection, c: sqlite3.Row, absorbed: list[in
     co_note = (f"Colombia only {co['total']:.1f} from {co['size']} pains (rank {co_rank} vs "
                f"{rank})" if co else "no pains with country co")
     lines += ["| Component | Input | Points |", "|---|---|---:|",
-              f"| Frequency | {b.get('distinct_urls', 0)} documents, {c['distinct_authors']} "
-              f"authors; Σ ln(1 + authors per document) = {b.get('url_spread', 0):.2f} "
+              f"| Frequency | {_freq_input(b, c['distinct_authors'])} "
               f"| +{b.get('frequency', 0):.1f} (old formula +{b.get('frequency_old', 0):.1f}) |",
               f"| Spend | {c['spend_count']} of {size} pains with a spend signal "
               f"| +{b.get('spend', 0):.1f} |",
-              f"| B2B | {_b2b_input(b, size, settings.scoring.b2b_min_known_share)} "
+              f"| B2B | {_b2b_input(b, size, sw.b2b_min_known_share, sw.b2b)} "
               f"| +{b.get('b2b', 0):.1f} |",
               f"| Pain-type weight | {types} | ×{b.get('type_weight', 1):.2f} |",
               f"| Reachability | {_input(b, 'reachability')} | +{b.get('reachability', 0):.1f} |",

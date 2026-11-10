@@ -89,5 +89,5 @@ clusters:
   91:  # Honorarios contables justos frente a la competencia
     reachability: null
     competition: null
-    status: active
-    note: ""
+    status: not_a_niche
+    note: "Accountants complaining about their own fees, not a pyme software need (2026-11-10)"

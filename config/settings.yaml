@@ -116,11 +116,19 @@ clustering:
 
 scoring:                  # see the formula printed at the top of each report
   frequency: 30
-  # frequency = 30 × min(1, Σ over source documents of ln(1 + authors there) / ln(1 + 50)):
-  # a document is one video, app listing, Maps place, TikTok video or job post.
-  frequency_saturation: 50
+  # frequency = 30 × min(1, sum / frequency_ceiling), sum = Σ over source documents of
+  # min(ln(1 + authors there), ln(1 + frequency_doc_cap)). A document is one video, app
+  # listing, Maps place, TikTok video or job post. (User spec, 2026-11-10.)
+  frequency_doc_cap: 30          # authors per document that count; more add nothing
+  # Set by hand to 15 for now. `niche-miner calibrate` sets it to the 90th percentile of the
+  # cluster sums across all niches collected: run it once after the 35-niche Computrabajo
+  # pass, then leave it fixed (a second run needs --force).
+  frequency_ceiling: 15
+  frequency_recalibrated_at: null   # date of the last `calibrate`; null = set by hand
+  frequency_saturation: 200      # only for the old author-count comparison ("old freq.")
   spend: 30
-  b2b: 20
+  b2b: 0                  # 2026-11-10 (user): off; consumers were 0 of 613 pains, so it was
+                          # ~20 for every cluster. Reachability's who_match covers who complains.
   b2b_min_known_share: 0.3  # fewer pains with a known role: b2b uses the niche-wide prior
   reachability: 20        # override in reachability.yaml, else the automated proxy
   competition: 20         # override in reachability.yaml, else the automated score

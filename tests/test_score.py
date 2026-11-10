@@ -14,7 +14,7 @@ from niche_miner.settings import ScoreWeights
 from niche_miner.source_rules import source_key
 
 W = ScoreWeights()
-FULL = math.log1p(50)  # url_spread that earns full frequency points
+FULL = W.frequency_ceiling  # url_spread that earns full frequency points
 
 
 def member(i: int, *, author: str | None = None, pain_type: str = "missing_capability",
@@ -54,16 +54,20 @@ def test_comments_and_reviews_are_grouped_by_their_document():
     assert source_key("computrabajo", None, 7) == "computrabajo:signal:7"
 
 
-def test_frequency_sums_diminishing_returns_per_document():
-    def freq(rows: list[dict]) -> tuple[float, float]:
-        b = compute_score(compute_stats(rows, W), 10, 0, W)
-        return b.frequency, b.frequency_old
+def test_frequency_sums_capped_documents_against_the_ceiling():
+    def freq(rows: list[dict]):
+        return compute_score(compute_stats(rows, W), 10, 0, W)
 
     one_video = [member(i, doc="v1") for i in range(11)]  # 11 authors under one video
     spread = [member(i, doc=f"v{i}") for i in range(6)]  # 6 videos, one author each
-    expected = round(30 * math.log(12) / math.log(51), 1)
-    assert freq(one_video) == (expected, expected) == (19.0, 19.0)
-    assert freq(spread) == (30, round(30 * math.log(7) / math.log(51), 1))  # 6·ln2 > ln51
+    b = freq(one_video)  # ln 12 / 15; old: ln 12 / ln 51
+    assert (b.frequency, b.frequency_old, b.freq_sum, b.cap_hits) == (5.0, 19.0, 2.48, 0)
+    assert freq(spread).frequency == round(30 * 6 * math.log(2) / 15, 1) == 8.3
+    crowded = freq([member(i, doc="v1") for i in range(40)])  # 40 authors count as 30
+    assert (crowded.freq_sum, crowded.cap_hits, crowded.frequency) == (3.43, 1, 6.9)
+    wide = freq([member(i, doc=f"v{i}") for i in range(22)])  # 22 · ln 2 = 15.2 ≥ 15
+    assert (wide.frequency, wide.above_ceiling) == (30, True)
+    assert not crowded.above_ceiling
     stats = compute_stats(one_video + [member(20, doc="v2")], W)
     assert (stats.distinct_urls, stats.distinct_sources, stats.top_url_count) == (2, 1, 11)
     assert stats.top_url_share == pytest.approx(11 / 12)
@@ -76,6 +80,14 @@ def test_b2b_uses_known_roles_or_the_prior_when_too_few_are_known():
     known = ClusterStats(10, 10, 0, business_count=2, known_role=4, url_spread=FULL)
     b = compute_score(known, 0, 0, W, b2b_prior=0.6)
     assert (b.b2b_insufficient, b.b2b_share, b.b2b, b.b2b_known) == (False, 0.5, 10, 0.4)
+
+
+def test_b2b_weight_zero_turns_the_component_off():
+    off = W.model_copy(update={"b2b": 0})
+    sparse = ClusterStats(10, 10, 0, business_count=2, known_role=0, url_spread=FULL)
+    b = compute_score(sparse, 0, 0, off, b2b_prior=0.6)
+    assert (b.b2b_insufficient, b.b2b_share, b.b2b) == (False, 0.0, 0)
+    assert "b2b          = 0 (off" in formula_markdown(off)
 
 
 def test_known_inputs_and_no_cap_when_reachability_is_zero():
@@ -100,7 +112,9 @@ def test_weights_come_from_config_and_are_printed():
     assert (b.spend, b.total) == (50, 50)
     md = formula_markdown(w)
     assert "50 × pains_with_spend_signal" in md and "under 50% of pains" in md
-    assert "reachability < 4" in md and "Σ_document ln(1 + authors_document)" in md
+    assert "reachability < 4" in md
+    assert "Σ_document min(ln(1 + authors_document), ln(1 + 30)) / 15" in md
+    assert "not run yet" in md
     assert "niche reachability_proxy × who_match" in md
 
 

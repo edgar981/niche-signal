@@ -10,6 +10,7 @@ import typer
 from dotenv import load_dotenv
 
 from . import autoreview
+from . import calibrate as calibration
 from . import cluster as clustering
 from . import db
 from . import report as reporting
@@ -205,6 +206,31 @@ def review(ctx: typer.Context, niche: NicheFilter = None,
 def score(ctx: typer.Context) -> None:
     """Score the latest clusters (merges.yaml, reachability.yaml overrides, data/review)."""
     _score(ctx.obj)
+
+
+@app.command()
+def calibrate(ctx: typer.Context,
+              dry_run: Annotated[bool, typer.Option(
+                  help="Print the new ceiling without writing settings.yaml.")] = False,
+              force: Annotated[bool, typer.Option(
+                  help="Recalibrate even though the ceiling was already calibrated.")] = False
+              ) -> None:
+    """Set scoring.frequency_ceiling to the 90th percentile of the latest clusters' frequency
+    sums (run once, after the 35-niche Computrabajo pass); then run `score` and `report`."""
+    c: Context = ctx.obj
+    try:
+        cal = calibration.calibrate(c.conn, c.paths.config, c.settings.scoring, force)
+        if not dry_run:
+            calibration.write_ceiling(c.paths.config / "settings.yaml", cal.ceiling,
+                                      datetime.now(UTC).date())
+    except calibration.CalibrationError as e:
+        typer.echo(f"calibrate: {e}", err=True)
+        raise typer.Exit(1) from e
+    above = sum(1 for s in cal.sums if s >= cal.ceiling)
+    typer.echo(f"calibrate: p{calibration.PERCENTILE} of {cal.clusters} cluster sums from "
+               f"{cal.niches} niche(s) = {cal.ceiling:g} (was {cal.previous:g}); {above} "
+               f"cluster(s) at or above it" + (" — dry run, nothing written" if dry_run else
+                                                 "; written to config/settings.yaml"))
 
 
 @app.command()
