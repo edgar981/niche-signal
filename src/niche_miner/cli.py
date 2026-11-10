@@ -9,6 +9,7 @@ from typing import Annotated, Any
 import typer
 from dotenv import load_dotenv
 
+from . import autoreview
 from . import cluster as clustering
 from . import db
 from . import report as reporting
@@ -106,7 +107,8 @@ def _extract(c: Context, niche: str | None, limit: int | None = None, model: str
     stats = Extractor(c.conn, c.llm(), c.settings.llm, model).run(niche, limit, retry_failed, redo)
     typer.echo(f"extract: {stats.signals} signals → {stats.complaints} complaints, "
                f"{stats.failed} failed ({stats.retried} retried, {stats.spend_dropped} "
-               f"non-verbatim spend quotes dropped)")
+               f"non-verbatim spend/cost quotes dropped, {stats.country_reset} Maps/Play "
+               f"countries set to unknown)")
     typer.echo(f"extract cost: {_usage_line(c, ('extract',), stats.signals)}")
     if redo:
         typer.echo("extract: previous clusters lost their members; run `cluster` next")
@@ -133,16 +135,30 @@ def _cluster(c: Context, niche: str | None, method: str | None = None) -> None:
     typer.echo(f"clustering cost: {_usage_line(c, ('label', 'themes', 'assign'))}")
 
 
+def _review(c: Context, niche: str | None = None, refresh: bool = False) -> None:
+    if niche:
+        c.niche(niche)
+    stats = autoreview.Reviewer(c.conn, c.settings, c.paths.config, c.paths.review,
+                                c.llm(), c.niches).run(niche, refresh)
+    typer.echo(f"review: competition for {stats.reviewed} clusters ({stats.cached} from the "
+               f"cache, {stats.failed} failed); reachability for {stats.niches_reviewed} niches "
+               f"({stats.niches_cached} from the cache); Google search about "
+               f"${stats.search_usd:.4f} (final figure in the Apify console)")
+    typer.echo(f"review cost: {_usage_line(c, ('review',))}")
+
+
 def _score(c: Context) -> None:
-    scored = scoring.score_latest(c.conn, c.paths.config, c.settings.scoring)
+    scored = scoring.score_latest(c.conn, c.paths.config, c.settings.scoring, c.paths.review)
     typer.echo(f"score: {len(scored)} clusters scored")
-    for s in scored[:5]:
-        typer.echo(f"  {s['score']:5.1f} (uncapped {s['uncapped']:5.1f})  #{s['id']} "
-                   f"[{s['niche']}] {s['label']}")
+    for s in [s for s in scored if s["status"] != "not_a_niche"][:5]:
+        co = f"{s['co_only']:5.1f}" if s["co_only"] is not None else "    —"
+        typer.echo(f"  {s['score']:5.1f} (old frequency {s['old']:5.1f}, co-only {co})  "
+                   f"#{s['id']} [{s['niche']}] {s['label']}")
 
 
 def _report(c: Context, niche: str | None = None, top: int | None = None) -> None:
-    path = reporting.write_report(c.conn, c.settings, c.paths.reports, niche=niche, top=top)
+    path = reporting.write_report(c.conn, c.settings, c.paths.reports, niche=niche, top=top,
+                                  review_dir=c.paths.review)
     typer.echo(f"report: {path}")
 
 
@@ -176,8 +192,18 @@ def cluster(ctx: typer.Context, niche: NicheFilter = None,
 
 
 @app.command()
+def review(ctx: typer.Context, niche: NicheFilter = None,
+           refresh: Annotated[bool, typer.Option(
+               help="Ignore the cache in data/review and review every active cluster again.")
+           ] = False) -> None:
+    """Automated competition per cluster and reachability per niche (Apify Google search,
+    Play Store, Computrabajo, YouTube, Claude); cached in data/review/."""
+    _review(ctx.obj, niche, refresh)
+
+
+@app.command()
 def score(ctx: typer.Context) -> None:
-    """Score the latest clusters (applies merges.yaml and reachability.yaml)."""
+    """Score the latest clusters (merges.yaml, reachability.yaml overrides, data/review)."""
     _score(ctx.obj)
 
 
@@ -191,11 +217,12 @@ def report(ctx: typer.Context, niche: NicheFilter = None,
 
 @app.command("run-all")
 def run_all(ctx: typer.Context, niche: Niche, limit: Limit = None) -> None:
-    """collect → extract → cluster → score → report for one niche."""
+    """collect → extract → cluster → review → score → report for one niche."""
     c: Context = ctx.obj
     _collect(c, niche, None, limit)
     _extract(c, niche)
     _cluster(c, niche)
+    _review(c, niche)
     _score(c)
     _report(c)
     typer.echo(f"LLM cost this run: ${sum(u['cost_usd'] for u in db.llm_usage(c.conn, c.run_id)):.4f}")

@@ -4,7 +4,15 @@ import pytest
 from helpers import FakeLLM, echo_valid, good_result, make_signal, prompt_items, response
 
 from niche_miner import db
-from niche_miner.extract import Extractor, build_prompt, is_verbatim, parse_results, source_hint
+from niche_miner.extract import (
+    RESPONSE_SCHEMA,
+    SYSTEM_PROMPT,
+    Extractor,
+    build_prompt,
+    is_verbatim,
+    parse_results,
+    source_hint,
+)
 from niche_miner.llm import LLMError
 from niche_miner.models import ExtractedPain
 
@@ -59,7 +67,7 @@ def test_package_ids_are_not_tool_names(tool, kept):
 @pytest.mark.parametrize(("country", "excluded"), [
     ("co", 0), ("unknown", 0), ("mx", 1), ("pe", 1), ("es", 1), ("other", 1)])
 def test_known_non_colombian_pains_are_flagged(conn, settings, country, excluded):
-    db.insert_signals(conn, [make_signal(0)])
+    db.insert_signals(conn, [make_signal(0, source="youtube")])
     Extractor(conn, FakeLLM(response(good_result(0, country=country))), settings.llm).run()
     row = stored(conn)[0]
     assert (row["country"], row["exclude_from_scoring"]) == (country, excluded)
@@ -212,3 +220,34 @@ def test_non_verbatim_spend_quote_is_dropped(conn, settings):
     assert [r["spend_signal"] for r in stored(conn)] == ["le pago 300 mil al mes a un contador",
                                                           None]
     assert stats.spend_dropped == 1
+
+
+def test_maps_and_play_reviews_need_an_explicit_colombian_cue(conn, settings):
+    texts = [("google_play", "La app se cierra cada vez que intento facturar algo."),
+             ("google_play", "La DIAN me rechaza todas las facturas que emito con la app."),
+             ("apify_gmaps", "Pésimo soporte en la sede de Bogotá, nadie contesta nunca."),
+             ("youtube", "No entiendo cómo habilitarme como facturador electrónico."),
+             ("google_play", "No puedo timbrar mis facturas desde que actualizaron la app.")]
+    db.insert_signals(conn, [make_signal(i, source=src, text=t) for i, (src, t) in enumerate(texts)])
+    countries = ["co", "co", "co", "co", "mx"]
+    llm = FakeLLM(response(*(good_result(i, country=c) for i, c in enumerate(countries))))
+    stats = Extractor(conn, llm, settings.llm).run()
+    assert [r["country"] for r in stored(conn)] == ["unknown", "co", "co", "co", "mx"]
+    assert stats.country_reset == 1
+    assert "never infer it from the store" in SYSTEM_PROMPT
+
+
+def test_cost_of_problem_is_kept_apart_from_spend_and_must_be_verbatim(conn, settings):
+    text = "Me tocó pagar una sanción de 2 millones porque la app no reportó a tiempo."
+    db.insert_signals(conn, [make_signal(0, text=text, source="youtube"),
+                             make_signal(1, text=text + " Otra vez.", source="youtube")])
+    llm = FakeLLM(response(good_result(0, cost_of_problem="pagar una sanción de 2 millones"),
+                           good_result(1, cost_of_problem="perdí 5 millones en ventas")))
+    stats = Extractor(conn, llm, settings.llm).run()
+    rows = stored(conn)
+    assert [r["cost_of_problem"] for r in rows] == ["pagar una sanción de 2 millones", None]
+    assert [r["spend_signal"] for r in rows] == [None, None]
+    assert stats.spend_dropped == 1
+    assert "cost_of_problem" in RESPONSE_SCHEMA["properties"]["results"]["items"]["required"]
+    assert "Tax owed, fines or penalties and lost sales are NOT spend" in " ".join(
+        SYSTEM_PROMPT.split())

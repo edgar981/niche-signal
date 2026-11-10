@@ -68,6 +68,30 @@ def usable_id(value: Any) -> str | None:
     return text if text and set(text) != {"*"} else None
 
 
+def start_and_wait(token: str, spec: ApifyActor, run_input: dict[str, Any],
+                   max_items: int | None, cap_usd: float, timeout_s: int) -> tuple[list, Any]:
+    """Start one capped actor run, wait for it, and return (dataset items, finished run).
+    Raises ApifyApiError; never restarts a run (a second run would be charged again)."""
+    client = ApifyClient(token)
+    run = client.actor(spec.actor).start(
+        run_input=run_input, max_items=max_items, max_total_charge_usd=Decimal(str(cap_usd)),
+        run_timeout=timedelta(seconds=timeout_s))
+    log.info("started %s (run %s, cap $%.2f, max %s items)", spec.actor, run.id, cap_usd,
+             max_items or "no")
+    done = client.run(run.id).wait_for_finish(wait_duration=timedelta(seconds=timeout_s + 120))
+    done = done or run
+    items = list(client.dataset(done.default_dataset_id).iterate_items(clean=True))
+    # Usage is settled a little after the run ends; read it again once items are in.
+    return items, client.run(done.id).get() or done
+
+
+def run_summary(done: Any) -> tuple[int, str]:
+    """(log level, status text without signed URLs) for a finished run."""
+    status = _LINK.sub("[link]", done.status_message or "")
+    level = logging.INFO if done.status == "SUCCEEDED" else logging.WARNING
+    return level, f"{done.status}{f' ({status})' if status else ''}"
+
+
 class ApifyCollector(Collector):
     min_interval_s = 0.0  # Apify runs the actor; there is no site of ours to rate-limit
 
@@ -111,19 +135,9 @@ class ApifyCollector(Collector):
         caps = [x for x in (spec.max_items, self.limit) if x]
         max_items = min(caps) if caps else None
         cap = spec.max_charge_usd or self.apify.max_charge_usd
-        client = ApifyClient(self.token)
         try:
-            run = client.actor(spec.actor).start(
-                run_input=render(spec.input, variables), max_items=max_items,
-                max_total_charge_usd=Decimal(str(cap)),
-                run_timeout=timedelta(seconds=self.apify.run_timeout_s))
-            log.info("%s: started %s (run %s, cap $%.2f, max %s items)", self.source,
-                     spec.actor, run.id, cap, max_items or "no")
-            done = client.run(run.id).wait_for_finish(
-                wait_duration=timedelta(seconds=self.apify.run_timeout_s + 120)) or run
-            items = list(client.dataset(done.default_dataset_id).iterate_items(clean=True))
-            # Usage is settled a little after the run ends; read it again once items are in.
-            done = client.run(done.id).get() or done
+            items, done = start_and_wait(self.token, spec, render(spec.input, variables),
+                                         max_items, cap, self.apify.run_timeout_s)
         except ApifyApiError as e:
             # Same failure for every target (bad token, no credit, wrong actor id): stop the
             # source. Other 4xx (e.g. an input the actor rejects for this target): skip it.
@@ -135,11 +149,9 @@ class ApifyCollector(Collector):
                 raise SkipTarget(self._detail(e, f"HTTP {code} {kind}")) from e
             raise
         self.cost_usd += float(done.usage_total_usd or 0)
-        status = _LINK.sub("[link]", done.status_message or "")  # may hold signed URLs
-        level = logging.INFO if done.status == "SUCCEEDED" else logging.WARNING
-        log.log(level, "%s: %s run %s %s%s: %d items, about $%.4f so far", self.source,
-                spec.actor, done.id, done.status, f" ({status})" if status else "", len(items),
-                float(done.usage_total_usd or 0))
+        level, status = run_summary(done)
+        log.log(level, "%s: %s run %s %s: %d items, about $%.4f so far", self.source,
+                spec.actor, done.id, status, len(items), float(done.usage_total_usd or 0))
         return items
 
     def _detail(self, e: Exception, prefix: str) -> str:

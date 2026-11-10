@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS extracted_pains (
     exclude_from_scoring INTEGER NOT NULL DEFAULT 0,  -- 1: known non-Colombian, kept but not scored
     current_tool  TEXT,
     spend_signal  TEXT,
+    cost_of_problem TEXT,  -- verbatim quote: tax owed, fines, lost sales (not spend)
     severity      INTEGER CHECK (severity BETWEEN 1 AND 5),
     model         TEXT NOT NULL,
     extracted_at  TEXT NOT NULL,
@@ -96,6 +97,7 @@ MIGRATIONS = [
     ("extracted_pains", "country", "TEXT"),
     ("extracted_pains", "exclude_from_scoring", "INTEGER NOT NULL DEFAULT 0"),
     ("clusters", "method", "TEXT"),
+    ("extracted_pains", "cost_of_problem", "TEXT"),
 ]
 
 
@@ -115,10 +117,6 @@ def connect(path: Path | str) -> sqlite3.Connection:
 
 def _iso(value: datetime | None) -> str | None:
     return value.isoformat(timespec="seconds") if value else None
-
-
-def _marks(n: int) -> str:
-    return ",".join("?" * n)
 
 
 def insert_signals(conn: sqlite3.Connection, signals: Iterable[RawSignal]) -> int:
@@ -159,17 +157,18 @@ def save_pains(conn: sqlite3.Connection,
     rows = []
     for signal_id, p, error in results:
         if p is None:
-            rows.append((signal_id, None, None, None, None, None, None, 0, None, None, None,
-                         model, now, error or "unknown error"))
+            rows.append((signal_id, *[None] * 6, 0, *[None] * 4, model, now,
+                         error or "unknown error"))
         else:
             rows.append((signal_id, int(p.is_complaint), p.pain, p.pain_type, p.who, p.who_type,
                          p.country, int(p.excluded_from_scoring), p.current_tool, p.spend_signal,
-                         p.severity, model, now, None))
+                         p.cost_of_problem, p.severity, model, now, None))
     with conn:
         conn.executemany(
             """INSERT INTO extracted_pains (raw_signal_id, is_complaint, pain, pain_type, who,
-               who_type, country, exclude_from_scoring, current_tool, spend_signal, severity,
-               model, extracted_at, error) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", rows)
+               who_type, country, exclude_from_scoring, current_tool, spend_signal,
+               cost_of_problem, severity, model, extracted_at, error)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", rows)
 
 
 def delete_extractions(conn: sqlite3.Connection, niche: str | None = None,
@@ -231,12 +230,12 @@ def member_details(conn: sqlite3.Connection, cluster_ids: Sequence[int]) -> list
     return conn.execute(
         f"""SELECT cm.cluster_id, cm.distance, ep.id AS pain_id, ep.pain, ep.pain_type, ep.who,
                    ep.who_type, ep.country, ep.exclude_from_scoring, ep.current_tool,
-                   ep.spend_signal, ep.severity, rs.id AS signal_id, rs.source, rs.url, rs.text,
-                   rs.author_hash, rs.author_type
+                   ep.spend_signal, ep.cost_of_problem, ep.severity, rs.id AS signal_id,
+                   rs.source, rs.url, rs.text, rs.author_hash, rs.author_type
             FROM cluster_members cm
             JOIN extracted_pains ep ON ep.id = cm.pain_id
             JOIN raw_signals rs ON rs.id = ep.raw_signal_id
-            WHERE cm.cluster_id IN ({_marks(len(cluster_ids))})
+            WHERE cm.cluster_id IN ({",".join("?" * len(cluster_ids))})
             ORDER BY cm.distance, ep.id""", list(cluster_ids)).fetchall()
 
 
@@ -248,8 +247,9 @@ def save_score(conn: sqlite3.Connection, cluster_id: int, stats: ClusterStats, *
            reachability=?, competition=?, score=?, score_breakdown=?, merged_into=?
            WHERE id=?""",
         (stats.size, stats.distinct_authors, stats.spend_count,
-         stats.business_count / stats.size if stats.size else 0.0, reachability, competition,
-         score, json.dumps(breakdown) if breakdown else None, merged_into, cluster_id))
+         stats.business_count / stats.known_role if stats.known_role else 0.0, reachability,
+         competition, score, json.dumps(breakdown) if breakdown else None, merged_into,
+         cluster_id))
 
 
 def log_llm_call(conn: sqlite3.Connection, run_id: str, purpose: str, model: str,

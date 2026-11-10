@@ -116,12 +116,16 @@ clustering:
 
 scoring:                  # see the formula printed at the top of each report
   frequency: 30
-  frequency_saturation: 50   # distinct authors that earn full frequency points
+  # frequency = 30 × min(1, Σ over source documents of ln(1 + authors there) / ln(1 + 50)):
+  # a document is one video, app listing, Maps place, TikTok video or job post.
+  frequency_saturation: 50
   spend: 30
   b2b: 20
-  reachability: 20
-  competition: 20
-  unreachable_cap: 20     # max score while reachability is 0
+  b2b_min_known_share: 0.3  # fewer pains with a known role: b2b uses the niche-wide prior
+  reachability: 20        # override in reachability.yaml, else the automated proxy
+  competition: 20         # override in reachability.yaml, else the automated score
+  no_audience_below: 3    # flag "no visible audience" under this reachability (still ranked)
+  unknown_who_weight: 0.7 # who_match: a pain with no `who` counts this much toward buyers
   # Multiplies a cluster's evidence (frequency + spend + b2b) by the mean weight of its
   # pains' types; unlisted types weigh 1.
   pain_type_weights:
@@ -129,3 +133,42 @@ scoring:                  # see the formula printed at the top of each report
 
 report:
   top_n: 10
+  single_url_flag: 0.5    # mark clusters where one document holds more than this share
+  rank_change_flag: 2     # mark clusters whose co-only rank moves by more than this
+
+# `niche-miner review` (also part of run-all): automated competition per active cluster
+# (data/review/<cluster_id>.json) and reachability per niche (data/review/niche_<tag>.json).
+# Every new `cluster` run creates new cluster ids, so competition is reviewed again: about
+# $0.0045 per Google query (3 per cluster, 1 per niche) plus one Claude call each.
+review:
+  cache_days: 30
+  query_suffixes: [Colombia, app, software]   # Google queries: "<theme label> <suffix>"
+  results_per_query: 10
+  play_hits: 10           # Play Store search results, country co
+  pains_shown: 8          # most central pains sent to Claude with the results
+  # Niche reachability: Computrabajo posts in the last 30 days for the niche's own
+  # computrabajo_queries in these cities (URL slugs), plus a gremio search per niche.
+  cities: [bogota-dc, medellin, cali]
+  gremio_query: "{niche} asociación Colombia"   # {niche} = the niche's `name`, else its tag
+  strong_job_posts: 50          # +1 for job_board at this many posts in 30 days
+  strong_fb_members: 20000      # +1 for fb_groups at this many members combined
+  strong_creator_audience: 20000   # creator_comments: +2 instead of +1 at this audience
+  search:
+    actor: apify/google-search-scraper
+    max_charge_usd: 0.50  # the actor refuses lower caps; ≈ 51 queries for 17 clusters ≈ $0.23
+    input:
+      queries: "{queries}"        # newline-separated, filled in by the code
+      countryCode: co
+      languageCode: es
+      searchLanguage: es
+      maxPagesPerQuery: 1
+      mobileResults: false
+      focusOnPaidAds: false
+      aiOverview: {scrapeFullAiOverview: false}   # paid add-ons stay off
+      aiModeSearch: {enableAiMode: false}
+      geminiSearch: {enableGemini: false}
+      chatGptSearch: {enableChatGpt: false}
+      copilotSearch: {enableCopilot: false}
+      perplexitySearch: {enablePerplexity: false}
+      websiteContentScraper: {enable: false}
+      maximumLeadsEnrichmentRecords: 0

@@ -17,10 +17,14 @@ from .settings import ClusterSettings
 
 log = logging.getLogger(__name__)
 
+BY_NEED = (
+    "Agrupa por la necesidad de fondo, no por la fuente ni por el estilo de redacción: una "
+    "oferta de empleo y una reseña de app que describen la misma necesidad van en el mismo tema."
+)
 THEMES_SYSTEM = (
     "Recibes una lista de dolores (necesidades no resueltas) extraídos de quejas escritas por "
-    "personas en Colombia. Propón alrededor de {n} temas que agrupen esos dolores por la "
-    "necesidad de fondo, no por la app que mencionan. Cada tema tiene un \"label\" en español de "
+    "personas en Colombia. Propón alrededor de {n} temas que agrupen esos dolores. " + BY_NEED
+    + " Tampoco agrupes por la app que mencionan. Cada tema tiene un \"label\" en español de "
     "máximo 6 palabras que nombra el problema (no la solución) y una \"description\" de una frase "
     "que dice qué dolores entran. Los temas no se solapan y entre todos cubren la mayoría de los "
     "dolores. No incluyas un tema genérico de \"otros\"."
@@ -34,8 +38,8 @@ THEMES_SCHEMA: dict[str, Any] = {
     "required": ["themes"], "additionalProperties": False,
 }
 ASSIGN_SYSTEM = (
-    "Asigna cada dolor al tema numerado que mejor lo describe. Usa 0 si ningún tema encaja bien. "
-    "Devuelve exactamente una asignación por id."
+    "Asigna cada dolor al tema numerado que mejor lo describe. " + BY_NEED + " Usa 0 si ningún "
+    "tema encaja bien. Devuelve exactamente una asignación por id."
 )
 _LABEL_STRIP = "\"'“”«»*#.- "
 

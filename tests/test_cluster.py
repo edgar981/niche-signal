@@ -9,7 +9,9 @@ from helpers import FakeLLM, seed_pain
 
 from niche_miner import cluster as clustering
 from niche_miner import db
+from niche_miner.cluster_llm import ASSIGN_SYSTEM, THEMES_SYSTEM
 from niche_miner.settings import ClusterSettings
+from niche_miner.source_rules import strip_boilerplate
 
 
 def blobs(per_group: int = 8, groups: int = 3, dim: int = 16, seed: int = 0) -> np.ndarray:
@@ -43,6 +45,18 @@ def test_method_choice(method, pains, chosen):
 def test_shared_opener_is_stripped_before_embedding():
     assert clustering.core_text("Necesita que la app no se cierre.") == "la app no se cierre."
     assert clustering.core_text("Requiere conciliar bancos") == "conciliar bancos"
+
+
+def test_job_post_boilerplate_is_left_out_of_clustering_input():
+    pain = ("Necesita conciliar los bancos cada mes.\nRequisitos: 2 años de experiencia\n"
+            "Horario: lunes a viernes\nSalario: $ 1.800.000\n$ 2.721.000,00 (Mensual)")
+    assert clustering.core_text(pain) == "conciliar los bancos cada mes."
+    assert strip_boilerplate("Salario: a convenir") == "Salario: a convenir"  # never empty
+
+
+def test_theme_prompts_group_by_need_not_by_source():
+    for prompt in (THEMES_SYSTEM, ASSIGN_SYSTEM):
+        assert "una oferta de empleo y una reseña de app" in prompt
 
 
 def rep_row(pain_id: int, author: str | None, excluded: int = 0) -> dict:

@@ -42,7 +42,7 @@ def test_a_first_release_database_is_migrated_in_place(tmp_path):
     old.close()
     conn = db.connect(path)
     columns = {r["name"] for r in conn.execute("PRAGMA table_info(extracted_pains)")}
-    assert {"pain_type", "country", "exclude_from_scoring"} <= columns
+    assert {"pain_type", "country", "exclude_from_scoring", "cost_of_problem"} <= columns
     assert "method" in {r["name"] for r in conn.execute("PRAGMA table_info(clusters)")}
     row = conn.execute("SELECT pain, exclude_from_scoring FROM extracted_pains").fetchone()
     assert tuple(row) == ("Necesita algo", 0)  # existing rows kept, flag defaults to in scope

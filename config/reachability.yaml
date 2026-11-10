@@ -1,10 +1,93 @@
-# Manual review per cluster, keyed by the cluster id shown in the report.
-#   reachability 0–10: "Can I name a channel with 100+ of these people?"
-#                      0 (the default) caps the cluster's score at 20.
-#   competition  0–10: 10 = strong incumbents. Subtracted from the score.
-# Ids are global: each `niche-miner cluster` run creates new ids, so entries for
-# older runs simply stop matching. Re-run `niche-miner score && niche-miner report`
-# after editing.
-
-clusters: {}
-#  12: {reachability: 7, competition: 3, note: "Grupo FB Contadores Colombia (45k)"}
+# Human overrides for the automated review, keyed by the cluster id shown in the report.
+#   reachability 0-10 or null   null = use the automated reachability_proxy (`niche-miner review`)
+#   competition  0-10 or null   null = use the automated competition score
+#   status       active | not_a_niche | merged_into:<id>
+#                not_a_niche: drops out of the top 10, stays in the full table
+#   note         free text; a note alone marks the cluster as reviewed
+# Ids are global: each `niche-miner cluster` run creates new ids, so entries for older runs
+# stop matching (the report ends with a paste-ready stub for the current ids).
+# After editing: niche-miner score && niche-miner report
+#
+#
+# Entries below: run 20261110T021231Z. All null: the automated values apply.
+clusters:
+  76:  # Cierres y pantallas en blanco al usar la app
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  77:  # Fallas al iniciar sesión y registrarse
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  78:  # Actualizaciones que rompen funciones existentes
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  79:  # Compatibilidad y funciones faltantes en móvil
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  80:  # Error al emitir facturas electrónicas en la app
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  81:  # Trámites de habilitación DIAN y certificado
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  82:  # Dudas de uso del facturador gratuito DIAN
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  83:  # Productos, precios y búsqueda en catálogo
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  84:  # Inventario que no refleja el stock real
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  85:  # Impresión, tirillas y descarga de documentos
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  86:  # Recibos de caja, abonos y cartera
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  87:  # Reportes de ventas e indicadores incompletos
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  88:  # Soporte técnico lento o sin respuesta
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  89:  # Cobros, planes y renovaciones cuestionados
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  90:  # Contabilidad, conciliación bancaria y nómina
+    reachability: null
+    competition: null
+    status: active
+    note: ""
+  91:  # Honorarios contables justos frente a la competencia
+    reachability: null
+    competition: null
+    status: active
+    note: ""

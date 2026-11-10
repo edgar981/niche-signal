@@ -118,7 +118,9 @@ class ScoreWeights(BaseModel):
     b2b: float = 20
     reachability: float = 20
     competition: float = 20
-    unreachable_cap: float = 20
+    b2b_min_known_share: float = Field(0.3, ge=0, le=1)  # below this, b2b uses the prior
+    no_audience_below: float = 3  # flag clusters whose automated reachability is under this
+    unknown_who_weight: float = Field(0.7, ge=0, le=1)  # who_match weight of an unknown `who`
     # Evidence multiplier per pain type; unlisted types weigh 1.
     pain_type_weights: dict[str, float] = Field(
         default_factory=lambda: {"incumbent_quality": 0.3})
@@ -126,6 +128,25 @@ class ScoreWeights(BaseModel):
 
 class ReportSettings(BaseModel):
     top_n: int = 10
+    single_url_flag: float = 0.5  # mark clusters where one document holds more of the pains
+    rank_change_flag: int = 2  # mark clusters whose co-only rank moves by more than this
+
+
+class ReviewSettings(BaseModel):
+    """`niche-miner review`: automated competition and reachability per cluster."""
+    cache_days: int = Field(30, ge=0)  # data/review/<cluster_id>.json is reused this long
+    model: str | None = None  # None = llm.label_model
+    query_suffixes: list[str] = Field(default_factory=lambda: ["Colombia", "app", "software"])
+    search: ApifyActor = Field(default_factory=ApifyActor)  # Google results; "{queries}"
+    results_per_query: int = Field(10, ge=1)
+    play_hits: int = Field(10, ge=1, le=30)  # Play Store search results (country co)
+    pains_shown: int = Field(8, ge=1)  # representative pains sent with the search results
+    # Niche reachability (audience.py): Computrabajo city slugs, gremio search, strong volumes.
+    cities: list[str] = Field(default_factory=lambda: ["bogota-dc", "medellin", "cali"])
+    gremio_query: str = "{niche} asociación Colombia"
+    strong_job_posts: int = 50  # Computrabajo posts in 30 days
+    strong_fb_members: int = 20_000  # FB group members combined
+    strong_creator_audience: int = 20_000  # creator subscribers combined: +2 instead of +1
 
 
 class Settings(BaseModel):
@@ -135,6 +156,7 @@ class Settings(BaseModel):
     clustering: ClusterSettings = Field(default_factory=ClusterSettings)
     scoring: ScoreWeights = Field(default_factory=ScoreWeights)
     report: ReportSettings = Field(default_factory=ReportSettings)
+    review: ReviewSettings = Field(default_factory=ReviewSettings)
 
 
 def find_root() -> Path:
@@ -155,6 +177,7 @@ class Paths:
         self.data = self.root / "data"
         self.db = self.data / "signals.db"
         self.reports = self.data / "reports"
+        self.review = self.data / "review"
         self.env = self.root / ".env"
 
 

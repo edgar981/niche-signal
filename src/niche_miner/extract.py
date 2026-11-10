@@ -11,7 +11,6 @@ import re
 import sqlite3
 from dataclasses import dataclass
 from typing import Any, Protocol
-from urllib.parse import parse_qs, urlparse
 
 from pydantic import ValidationError
 
@@ -19,6 +18,7 @@ from . import db
 from .llm import LLMError
 from .models import ExtractedPain
 from .settings import LLMSettings
+from .source_rules import country_rule, source_hint
 
 log = logging.getLogger(__name__)
 
@@ -58,17 +58,25 @@ cannot tell.
 - country: where the writer is: "co", "mx", "pe", "ar", "es", "other" or "unknown". Use \
 explicit mentions and strong cues: tax authority (DIAN = co, SAT or CFDI = mx, SUNAT = pe, \
 AFIP or ARCA = ar, Hacienda or AEAT = es), currency (euros = es), cities, regional slang. A \
-store's country does not prove the writer's country. "unknown" if there is no cue.
+store's country does not prove the writer's country. Google Maps and Google Play listings mix \
+countries: for those, "co" needs an explicit Colombian cue in the texto (a Colombian city, \
+DIAN, COP, pesos, NIT, RUT, Nequi, PSE); never infer it from the store, the app or the locale. \
+"unknown" if there is no cue.
 - current_tool: the product they use today for this job, by product name only, e.g. "Siigo \
 Nube", "Alegra", "Loggro" (for an app review, usually the reviewed app). Never a package id \
 such as "com.example.app", and no extra words like "app" or "móvil". "manual/Excel/WhatsApp" \
 when they do the job by hand, in spreadsheets or in chats. null if nothing is stated or implied.
 - spend_signal: a quote copied exactly from the texto, character for character, only if it \
-shows real money paid or lost ("le pago 300 mil al mes a un contador", "ya van 120 mil pesos \
-perdidos"), recurring hours lost ("pierdo dos días cada cierre"), or someone hired or paid to \
-deal with it. Workarounds (reinstalling, logging in again), one-off waits ("llevo un mes \
-esperando") and complaints that something is expensive are not spend signals. Do not \
-translate, shorten or fix typos. null if there is none.
+shows money paid to a provider, a person or a tool ("le pago 300 mil al mes a un contador", \
+"me cobraron 8 millones por la renovación"), recurring hours lost ("pierdo dos días cada \
+cierre"), or someone hired or paid to deal with it. Tax owed, fines or penalties and lost \
+sales are NOT spend (they go in cost_of_problem). Workarounds (reinstalling, logging in \
+again), one-off waits ("llevo un mes esperando") and complaints that something is expensive \
+are not spend signals either. Do not translate, shorten or fix typos. null if there is none.
+- cost_of_problem: a quote copied exactly from the texto, with the same copying rules, only if \
+it shows what the problem costs them that is not spend: tax owed, fines or penalties, \
+interest, lost sales or customers ("me tocó pagar una sanción de 2 millones", "perdí ventas \
+por no poder facturar"). null if there is none.
 - severity: 1 to 5. 1 = minor annoyance; 3 = recurring problem that costs time or money; \
 5 = it blocks their work or business, or makes them lose money or customers.
 
@@ -82,7 +90,7 @@ who is the kind of business hiring, from its sector or the text (e.g. "empresa \
 distribuidora", "constructora"), never the job title; who_type is "business"; current_tool is \
 the software the post asks for, by product name ("Siigo", "World Office"), or \
 "manual/Excel/WhatsApp" if it only asks for Excel; spend_signal is the "Salario:" line or the \
-sentence that shows the hire, copied exactly; severity is usually 3. is_complaint is false \
+sentence that shows the hire, copied exactly; cost_of_problem is null; severity is usually 3. is_complaint is false \
 for posts without such work (sales, driving, cleaning, customer service) and for courses or \
 ads posing as jobs.
 
@@ -109,10 +117,12 @@ RESPONSE_SCHEMA: dict[str, Any] = {
                     "country": {"type": "string", "enum": COUNTRIES},
                     "current_tool": _NULLABLE_STRING,
                     "spend_signal": _NULLABLE_STRING,
+                    "cost_of_problem": _NULLABLE_STRING,
                     "severity": {"type": "integer", "enum": [1, 2, 3, 4, 5]},
                 },
                 "required": ["id", "is_complaint", "pain", "pain_type", "who", "who_type",
-                             "country", "current_tool", "spend_signal", "severity"],
+                             "country", "current_tool", "spend_signal", "cost_of_problem",
+                             "severity"],
                 "additionalProperties": False,
             },
         }
@@ -134,29 +144,8 @@ class ExtractStats:
     complaints: int = 0
     failed: int = 0
     retried: int = 0
-    spend_dropped: int = 0  # spend quotes discarded because they weren't verbatim
-
-
-def source_hint(source: str, url: str | None) -> str:
-    """Short 'fuente' for the model, e.g. which app a review is about."""
-    if source == "google_play" and url:
-        app_id = parse_qs(urlparse(url).query).get("id", ["?"])[0]
-        return f"reseña de 1-2 estrellas en Google Play (tienda Colombia), app con id {app_id}"
-    if source == "computrabajo":
-        return "oferta de empleo en Computrabajo Colombia, escrita por la empresa que contrata"
-    if source == "youtube":
-        return ("comentario en un video de YouTube; la línea 'Video:' es el título del video, "
-                "contexto que no escribió quien comenta")
-    if source == "apify_gmaps":
-        return ("reseña de pocas estrellas en Google Maps; la línea 'Lugar en Google Maps:' es "
-                "el negocio reseñado, contexto que no escribió quien reseña")
-    if source == "apify_tiktok":
-        return ("comentario en un video de TikTok; la línea 'Video de TikTok:' es la descripción "
-                "del video, contexto que no escribió quien comenta")
-    if source == "apify_facebook":
-        return ("publicación o comentario en un grupo público de Facebook; la primera línea "
-                "(nombre del grupo o publicación comentada) es contexto, no de quien escribe")
-    return source
+    spend_dropped: int = 0  # spend / cost quotes discarded because they weren't verbatim
+    country_reset: int = 0  # Maps/Play "co" without an explicit Colombian cue -> "unknown"
 
 
 def build_prompt(rows: list[sqlite3.Row], max_chars: int) -> str:
@@ -248,11 +237,16 @@ class Extractor:
         results: list[tuple[int, ExtractedPain | None, str | None]] = []
         for i, row in enumerate(rows):
             pain = ok.get(i)
-            if pain and pain.spend_signal and not is_verbatim(pain.spend_signal, row["text"]):
-                log.debug("dropping non-verbatim spend quote for signal %s: %r",
-                          row["id"], pain.spend_signal)
-                pain = pain.model_copy(update={"spend_signal": None})
-                stats.spend_dropped += 1
+            for field in ("spend_signal", "cost_of_problem"):
+                quote = getattr(pain, field) if pain else None
+                if pain and quote and not is_verbatim(quote, row["text"]):
+                    log.debug("dropping non-verbatim %s for signal %s: %r", field, row["id"], quote)
+                    pain = pain.model_copy(update={field: None})
+                    stats.spend_dropped += 1
+            country = country_rule(row["source"], row["text"], pain.country) if pain else None
+            if pain and country != pain.country:
+                pain = pain.model_copy(update={"country": country})
+                stats.country_reset += 1
             results.append((row["id"], pain, None if pain else errors.get(i)))
             stats.signals += 1
             stats.complaints += bool(pain and pain.is_complaint)

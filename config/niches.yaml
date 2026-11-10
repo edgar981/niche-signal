@@ -4,6 +4,16 @@
 # google_play_apps must be real package ids from the Colombian store; a wrong id is
 # logged and skipped. Check one with:
 #   uv run python -c "from google_play_scraper import app; print(app('<id>', lang='es', country='co')['title'])"
+#
+# Reachability (`niche-miner review`, scored per niche by channel type):
+#   computrabajo_queries   job titles; posts in the last 30 days are counted per city
+#   buyer_roles            who pays in this niche; a cluster's reachability is the niche value ×
+#                          the share of its pains whose `who` starts with one of these words
+#                          (accents ignored; an unknown `who` counts 0.7). Unset: no discount.
+#   name                   optional, for the gremio search "<name> asociación Colombia"
+#                          (default: the tag with spaces)
+#   facebook_group_members optional {group url: members}, by hand until a collector finds them
+#   whatsapp_communities   optional [{name: ..., members: N}], by hand
 
 niches:
   - tag: contadores_pymes
@@ -36,3 +46,79 @@ niches:
     facebook_groups: []          # public groups only, e.g. "https://www.facebook.com/groups/<id>"
     gmaps_queries: ["software contable Bogotá"]   # a Google Maps search: places + their reviews
     tiktok_hashtags: ["contadorescolombia"]       # without the #
+    # Buyer = the business that pays (assumption, 2026-11-09: pymes, not their contadores).
+    buyer_roles: [dueño, dueña, propietario, propietaria, negocio, comerciante, empresa,
+                  compañía, emprendedor, pyme, microempresa, gerente, administrador,
+                  representante, emisor, factura, vendedor, importador, fabricante,
+                  distribuidora, tienda, restaurante, cooperativa, empleador, entidad,
+                  institución, multinacional, prestador, persona natural]
+
+  # --- Candidate niches added 2026-11-09. Only seeds the user gave are filled in; a niche
+  # with no collector keys is skipped by every source until seeds are added.
+  # 1-8: no seeds yet.
+  - tag: propiedad_horizontal          # administración de conjuntos (Ley 675 paperwork, fragmented software)
+  - tag: consultorios_odontologicos_esteticos   # agendamiento, recordatorios, historia clínica light
+  - tag: talleres_mecanicos
+  - tag: inmobiliarias_arrendadores    # pequeñas inmobiliarias y arrendadores
+  - tag: transporte_carga_pequeno
+  - tag: jardines_colegios_pequenos    # jardines infantiles y colegios pequeños
+  - tag: veterinarias
+  - tag: droguerias_independientes
+
+  # 9-34: Computrabajo queries as given.
+  - tag: consultores_sst               # mandatory safety docs for many client companies, deadline-driven
+    computrabajo_queries: ["consultor SST", "coordinador SG-SST"]
+  - tag: ips_pequenas_facturacion_eps  # small clinics billing EPS: RIPS, glosas, cartera with insurers
+    computrabajo_queries: ["auxiliar de facturación salud", "glosas"]
+  - tag: fondos_empleados_cooperativas # credit and savings for members, regulated, often on Excel
+    computrabajo_queries: ["analista fondo de empleados"]
+  - tag: rutas_escolares               # routes, parent payments, monitoras
+    computrabajo_queries: ["monitora ruta escolar", "coordinador de rutas"]
+  - tag: gimnasios_boxes               # memberships, cobros mensuales, asistencia
+    computrabajo_queries: ["recepcionista gimnasio", "asesor comercial gimnasio"]
+  - tag: barberias_salones             # booking, no-shows, commissions per stylist
+    computrabajo_queries: ["recepcionista salón de belleza"]
+  - tag: confecciones_talleres         # Bogotá textile workshops: production orders, satélites, piecework pay
+    computrabajo_queries: ["jefe de producción confección", "control de calidad confección"]
+  - tag: distribuidores_tat            # wholesale distributors with preventa/ruteros to tiendas
+    computrabajo_queries: ["preventista", "vendedor TAT"]
+  - tag: abogados_independientes       # case tracking, court deadlines (términos), client billing
+    computrabajo_queries: ["asistente jurídico", "auxiliar judicial"]
+  - tag: psicologos_terapeutas         # scheduling, session notes, recurring payments
+    computrabajo_queries: ["asistente consultorio psicología"]
+  - tag: fisioterapia_rehabilitacion   # sessions per patient, EPS authorizations
+    computrabajo_queries: ["auxiliar fisioterapia"]
+  - tag: opticas                       # prescriptions, lab orders, follow-ups
+    computrabajo_queries: ["asesor óptica"]
+  - tag: panaderias_pasteleria_por_pedido   # custom orders, production planning, deposits
+    computrabajo_queries: ["auxiliar de pedidos pastelería"]
+  - tag: tiendas_instagram_whatsapp    # sellers who take orders by DM: pedidos, envíos, cobros
+    computrabajo_queries: ["community manager ventas WhatsApp", "auxiliar de despachos"]
+  - tag: importadores_pequenos         # landed cost, nacionalización, inventory
+    computrabajo_queries: ["auxiliar de comercio exterior", "auxiliar de importaciones"]
+  - tag: constructores_pequenos        # cotizaciones, control de obra, pagos a maestros
+    computrabajo_queries: ["residente de obra", "auxiliar de presupuestos"]
+  - tag: carpinterias_muebles_medida   # quotes, materials, production stages
+    computrabajo_queries: ["diseñador de muebles cotizaciones"]
+  - tag: empresas_aseo_servicios       # cleaning companies: shifts, nómina, client sites
+    computrabajo_queries: ["supervisor servicios generales", "programador de turnos"]
+  - tag: alquiler_equipos_eventos      # availability, deposits, damage
+    computrabajo_queries: ["coordinador logístico alquiler"]
+  - tag: organizadores_eventos_bodas   # budgets, vendor payments, timelines per event
+    computrabajo_queries: ["asistente de eventos", "wedding planner"]
+  - tag: fotografos_videografos        # bookings, deliveries, client galleries, cobros
+    computrabajo_queries: ["asistente fotógrafo eventos"]
+  - tag: academias_deportivas          # football/skating schools: mensualidades, asistencia, categorías
+    computrabajo_queries: ["coordinador escuela de fútbol"]
+  - tag: iglesias_fundaciones          # donations, members, event logistics; mostly Excel
+    computrabajo_queries: ["asistente administrativo fundación", "tesorería iglesia"]
+  - tag: hostales_fincas_turisticas    # reservations across channels, cleaning
+    computrabajo_queries: ["recepcionista hostal", "administrador finca turística"]
+  - tag: servicio_tecnico_celulares_electro   # repair shops: tickets, parts, warranty
+    computrabajo_queries: ["técnico de celulares", "recepción servicio técnico"]
+  - tag: mensajeria_motorizados        # small courier fleets: dispatch, proof of delivery, settlements
+    computrabajo_queries: ["coordinador de mensajería"]
+
+  # 35: not a Computrabajo niche. Seed from LinkedIn/Twitter/communities; no collector reads
+  # those yet.
+  - tag: freelancers_tecnologia        # Colombian freelancers billing abroad: USD invoices, DIAN, cobros

@@ -18,8 +18,9 @@ uv run niche-miner run-all --niche contadores_pymes              # full run
 ```
 
 Or step by step: `collect --niche X [--source google_play|computrabajo|youtube|apify_gmaps|apify_tiktok|apify_facebook] [--limit N]`, `extract`,
-`cluster`, `score`, `report`. Reports land in `data/reports/YYYY-MM-DD.md`; everything else
-in `data/signals.db`. Re-running `collect` only adds new signals; `extract` only processes
+`cluster`, `review [--refresh]`, `score`, `report`. Reports land in `data/reports/YYYY-MM-DD.md`;
+automated reviews in `data/review/` (`<cluster_id>.json`, `niche_<tag>.json`); DB backups in
+`data/backups/`; everything else in `data/signals.db`. Re-running `collect` only adds new signals; `extract` only processes
 signals it hasn't seen (`--retry-failed` re-runs failures).
 
 ## Sources
@@ -59,18 +60,43 @@ signals it hasn't seen (`--retry-failed` re-runs failures).
 
 ## Review loop
 
-1. Read the report. Each cluster has an id, score breakdown, quotes and a blank `Hypothesis:`.
-2. Fill `config/reachability.yaml` (reachability/competition 0–10 per cluster id; the report
-   ends with a paste-ready stub) and `config/merges.yaml` (`target_id: [ids]`).
-3. `uv run niche-miner score && uv run niche-miner report` — no re-clustering needed.
+`review` (part of `run-all`) fills in what you don't override, cached 30 days:
 
-Cluster ids are global: a new `cluster` run creates new ids, so redo step 2 after re-clustering.
+- **competition** (0–10): Google results for "<theme label> Colombia / app / software" (Apify
+  `apify/google-search-scraper`, about $0.0045 per query), a Play Store search (country co) and
+  the cluster's current tools go to Claude. Claude lists incumbents (name, country, exact or
+  adjacent fit) and applies the rubric: 0 = nothing specific, 5 = generic tools partly cover
+  it, 8–10 = a Colombian incumbent does exactly this.
+- **reachability_proxy** (0–10), per niche, by channel *type*: `job_board` (Computrabajo posts
+  in the last 30 days for the niche's own `computrabajo_queries`, in Bogotá, Medellín and Cali),
+  `fb_groups` (listed groups; member counts by hand in `facebook_group_members`), `gremio`
+  (Google "<niche> asociación Colombia", names extracted by Claude) and `whatsapp_community`
+  (by hand). 0 = no type with signal, 3 = one, 5 = two, 7 = three; +1 per type with strong
+  volume (≥ 50 posts, ≥ 20k FB members, a gremio with a public member directory). YouTube /
+  TikTok creators whose videos drew the comments add at most +2 and never count as a type.
+  Capped at 10.
+- A cluster's reachability is the niche value × **who_match**: the share of its pains whose
+  `who` starts with one of the niche's `buyer_roles` (niches.yaml), an unknown `who` counting
+  0.7. Under 3 with no override, the report flags "no visible audience" but still ranks it.
+
+Then:
+
+1. Read the report: a top-10 table (score, old-frequency score, co-only score, documents,
+   flags), and per cluster the breakdown, incumbents, audience, quotes and a blank `Hypothesis:`.
+2. Override what you disagree with in `config/reachability.yaml`: `reachability` /
+   `competition` (null keeps the automated value), `status` (`active`, `not_a_niche`,
+   `merged_into:<id>`) and `note`. The report ends with a paste-ready stub for the clusters
+   not reviewed yet. `config/merges.yaml` (`target_id: [ids]`) still works too.
+3. `uv run niche-miner score && uv run niche-miner report`. No re-clustering needed.
+
+Cluster ids are global: a new `cluster` run creates new ids, so overrides and the review cache
+stop matching after re-clustering (`review` runs again for the new ids).
 
 ## Config
 
 - `config/niches.yaml` — seeds per niche; each collector reads only its own key.
 - `config/settings.yaml` — model, effort, batch size, pricing (cost logging), filters,
-  HDBSCAN params, scoring weights.
+  HDBSCAN params, scoring weights, report flags, and `review` (search actor, cache days).
 
 ## Tests
 

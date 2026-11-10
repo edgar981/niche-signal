@@ -53,9 +53,11 @@ class ExtractedPain(BaseModel):
     country: Country = "unknown"
     current_tool: str | None = None
     spend_signal: str | None = None
+    cost_of_problem: str | None = None  # tax owed, fines, lost sales: costs that are not spend
     severity: int = Field(ge=1, le=5)
 
-    @field_validator("pain", "who", "current_tool", "spend_signal", mode="before")
+    @field_validator("pain", "who", "current_tool", "spend_signal", "cost_of_problem",
+                     mode="before")
     @classmethod
     def _blank_to_none(cls, value: object) -> object:
         if isinstance(value, str):

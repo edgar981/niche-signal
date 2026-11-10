@@ -25,6 +25,7 @@ from .cluster_llm import clean_label, llm_assign
 from .extract import Completer
 from .models import Cluster
 from .settings import ClusterSettings
+from .source_rules import strip_boilerplate
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +44,9 @@ _models: dict[str, object] = {}
 
 
 def core_text(pain: str) -> str:
-    """Drop the shared "Necesita…" opener so embeddings separate on the need itself."""
+    """Drop job-post boilerplate lines and the shared "Necesita…" opener so embeddings separate
+    on the need itself."""
+    pain = strip_boilerplate(pain)
     return _OPENER.sub("", pain).strip() or pain
 
 
@@ -117,7 +120,8 @@ def cluster_niche(conn: sqlite3.Connection, llm: Completer, niche: str, run_id: 
         return chosen, 0, 0
     embeddings = embed([core_text(r["pain"]) for r in rows], cfg.embedding_model)
     if chosen == "llm":
-        labels, names = llm_assign(llm, label_model, [r["pain"] for r in rows], cfg)
+        labels, names = llm_assign(llm, label_model,
+                                   [strip_boilerplate(r["pain"]) for r in rows], cfg)
     else:
         labels, names = assign_clusters(embeddings, cfg), {}
     for value in set(labels.tolist()) - {-1}:  # groups below min_cluster_size are noise
