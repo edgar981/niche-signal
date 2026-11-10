@@ -32,6 +32,7 @@ niches:
       - AWJNC_JSYko   # Franklin Salazar: facturas electrónicas en Siigo Nube
       - nq7fqrZAUYM   # Innovación Siigo: facturación electrónica en Siigo Nube
     computrabajo_queries: ["auxiliar contable excel", "conciliación bancaria"]
-    facebook_groups: []          # e.g. "https://www.facebook.com/groups/<id>"
-    gmaps_queries: ["software contable Bogotá"]
-    tiktok_hashtags: ["contadorescolombia"]
+    # Apify sources (need APIFY_TOKEN; cost per target in config/settings.yaml).
+    facebook_groups: []          # public groups only, e.g. "https://www.facebook.com/groups/<id>"
+    gmaps_queries: ["software contable Bogotá"]   # a Google Maps search: places + their reviews
+    tiktok_hashtags: ["contadorescolombia"]       # without the #

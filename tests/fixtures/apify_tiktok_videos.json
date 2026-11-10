@@ -1,0 +1,19 @@
+[
+  {
+    "id": "7400000000000000001",
+    "text": "Errores comunes al facturar en el portal gratuito de la DIAN #contadorescolombia @soporte.dian",
+    "createTimeISO": "2026-07-01T12:00:00.000Z",
+    "authorMeta": {"id": "6900000000000000001", "name": "contadora.ejemplo", "nickName": "Contadora Ejemplo"},
+    "webVideoUrl": "https://www.tiktok.com/@contadora.ejemplo/video/7400000000000000001"
+  },
+  {
+    "url": "https://www.tiktok.com/@otro/video/7400000000000000099",
+    "error": "Post not found or private."
+  },
+  {
+    "id": "7400000000000000002",
+    "text": "",
+    "authorMeta": {"id": "6900000000000000002", "name": "pyme.tips"},
+    "webVideoUrl": "https://www.tiktok.com/@pyme.tips/video/7400000000000000002"
+  }
+]

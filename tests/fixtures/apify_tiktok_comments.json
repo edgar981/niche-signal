@@ -1,0 +1,32 @@
+[
+  {
+    "text": "A mí el portal de la DIAN me bota la sesión cada vez que intento firmar la factura, pierdo horas todos los días",
+    "createTimeISO": "2026-07-02T09:15:00.000Z",
+    "uniqueId": "usuario.ejemplo1",
+    "uid": "7000000000000000011",
+    "cid": "7400000000000100001",
+    "videoWebUrl": "https://www.tiktok.com/@contadora.ejemplo/video/7400000000000000001?lang=es",
+    "avatarThumbnail": "https://p16.example/avatar1.jpg"
+  },
+  {
+    "text": "Gracias por la info, me sirvió muchísimo para entender el proceso de habilitación!!",
+    "createTimeISO": "2026-07-02T10:00:00.000Z",
+    "uniqueId": "contadora.ejemplo",
+    "uid": "6900000000000000001",
+    "cid": "7400000000000100002",
+    "videoWebUrl": "https://www.tiktok.com/@contadora.ejemplo/video/7400000000000000001"
+  },
+  {
+    "text": "jajaja",
+    "uid": "7000000000000000012",
+    "cid": "7400000000000100003",
+    "videoWebUrl": "https://www.tiktok.com/@contadora.ejemplo/video/7400000000000000001"
+  },
+  {
+    "text": "Yo uso Excel para la nómina porque el software que compramos no calcula bien las horas extra de los domingos",
+    "createTimeISO": "2026-07-05T18:40:00.000Z",
+    "uniqueId": "usuario.ejemplo2",
+    "cid": "7400000000000200001",
+    "videoWebUrl": "https://www.tiktok.com/@pyme.tips/video/7400000000000000002"
+  }
+]

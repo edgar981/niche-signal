@@ -56,12 +56,44 @@ class YouTubeSettings(BaseModel):
     timeout_s: float = 20.0
 
 
+class ApifyActor(BaseModel):
+    """One actor run. Actor ids and inputs live in config/settings.yaml (SPEC), not here."""
+    actor: str = ""  # e.g. "compass/crawler-google-places"; empty = the source is skipped
+    input: dict[str, Any] = Field(default_factory=dict)  # "{target}"-style placeholders
+    max_items: int | None = Field(None, ge=1)  # Apify stops charging per-item past this
+    max_charge_usd: float | None = Field(None, gt=0)  # cost cap for one run; None = apify default
+
+
+class ApifyGmapsSettings(BaseModel):
+    run: ApifyActor = Field(default_factory=ApifyActor)
+    max_stars: int = Field(3, ge=1, le=5)  # keep reviews with at most this many stars
+
+
+class ApifyTikTokSettings(BaseModel):
+    videos: ApifyActor = Field(default_factory=ApifyActor)  # hashtag -> videos
+    comments: ApifyActor = Field(default_factory=ApifyActor)  # video URLs -> comments
+
+
+class ApifyFacebookSettings(BaseModel):
+    run: ApifyActor = Field(default_factory=ApifyActor)
+    include_comments: bool = True  # the top comments the actor returns with each post
+
+
+class ApifySettings(BaseModel):
+    max_charge_usd: float = Field(0.25, gt=0)  # default cost cap per actor run
+    run_timeout_s: int = Field(900, ge=60)
+    gmaps: ApifyGmapsSettings = Field(default_factory=ApifyGmapsSettings)
+    tiktok: ApifyTikTokSettings = Field(default_factory=ApifyTikTokSettings)
+    facebook: ApifyFacebookSettings = Field(default_factory=ApifyFacebookSettings)
+
+
 class CollectorSettings(BaseModel):
     retries: int = 3
     backoff_s: float = 2.0
     google_play: GooglePlaySettings = Field(default_factory=GooglePlaySettings)
     computrabajo: ComputrabajoSettings = Field(default_factory=ComputrabajoSettings)
     youtube: YouTubeSettings = Field(default_factory=YouTubeSettings)
+    apify: ApifySettings = Field(default_factory=ApifySettings)
 
 
 class ClusterSettings(BaseModel):

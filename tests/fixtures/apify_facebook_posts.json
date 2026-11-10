@@ -1,0 +1,48 @@
+[
+  {
+    "facebookUrl": "https://www.facebook.com/groups/contadoresejemplo",
+    "url": "https://www.facebook.com/groups/contadoresejemplo/permalink/5550001/",
+    "time": "2026-10-01T14:00:00.000Z",
+    "user": {"id": "100000000000001", "name": "Carlos Ejemplo"},
+    "text": "¿Alguien sabe por qué el validador de la DIAN rechaza las notas crédito? Llevo una semana sin poder enviar y los clientes me reclaman. Escríbanme a carlos@ejemplo.com",
+    "legacyId": "5550001",
+    "id": "UzpfSTEwMDAwMDAwMDAwMDAwMTpWSzo1NTUwMDAx",
+    "commentsCount": 2,
+    "topComments": [
+      {
+        "commentUrl": "https://www.facebook.com/groups/contadoresejemplo/permalink/5550001/?comment_id=5550002",
+        "id": "Y29tbWVudDo1NTUwMDAxXzU1NTAwMDI=",
+        "date": "2026-10-01T15:00:00.000Z",
+        "text": "Me pasa igual con Siigo, el soporte solo dice que es culpa de la DIAN y no lo resuelven nunca.",
+        "profileUrl": "https://www.facebook.com/maria.ejemplo",
+        "profileId": "100000000000002",
+        "profileName": "María Ejemplo"
+      },
+      {
+        "id": "Y29tbWVudDo1NTUwMDAxXzU1NTAwMDM=",
+        "date": "2026-10-01T16:00:00.000Z",
+        "text": "Revisa el CUFE de la factura original y que la fecha no sea anterior, a mí eso me lo solucionó.",
+        "profileId": "******",
+        "profileName": "******"
+      }
+    ],
+    "groupTitle": "Contadores Colombia Ejemplo",
+    "inputUrl": "https://www.facebook.com/groups/contadoresejemplo"
+  },
+  {
+    "url": "https://www.facebook.com/groups/contadoresejemplo/permalink/5550010/",
+    "time": "2026-10-03T09:00:00.000Z",
+    "user": {"id": "100000000000003", "name": "Pedro Ejemplo"},
+    "text": "",
+    "legacyId": "5550010",
+    "topComments": [
+      {
+        "id": "Y29tbWVudDo1NTUwMDEwXzU1NTAwMTE=",
+        "date": "2026-10-03T10:00:00.000Z",
+        "text": "Esa foto del formulario 110 no se ve, ¿puedes subirla otra vez con mejor resolución por favor?",
+        "profileId": "100000000000004"
+      }
+    ],
+    "groupTitle": "Contadores Colombia Ejemplo"
+  }
+]

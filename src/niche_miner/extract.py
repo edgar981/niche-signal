@@ -147,6 +147,15 @@ def source_hint(source: str, url: str | None) -> str:
     if source == "youtube":
         return ("comentario en un video de YouTube; la línea 'Video:' es el título del video, "
                 "contexto que no escribió quien comenta")
+    if source == "apify_gmaps":
+        return ("reseña de pocas estrellas en Google Maps; la línea 'Lugar en Google Maps:' es "
+                "el negocio reseñado, contexto que no escribió quien reseña")
+    if source == "apify_tiktok":
+        return ("comentario en un video de TikTok; la línea 'Video de TikTok:' es la descripción "
+                "del video, contexto que no escribió quien comenta")
+    if source == "apify_facebook":
+        return ("publicación o comentario en un grupo público de Facebook; la primera línea "
+                "(nombre del grupo o publicación comentada) es contexto, no de quien escribe")
     return source
 
 

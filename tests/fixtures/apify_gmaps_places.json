@@ -1,0 +1,56 @@
+[
+  {
+    "title": "Contables Express SAS",
+    "categoryName": "Asesor contable",
+    "url": "https://www.google.com/maps/place/?q=place_id:ChIJfakePlace0001",
+    "placeId": "ChIJfakePlace0001",
+    "reviews": [
+      {
+        "name": "Ana Ejemplo Pérez",
+        "text": "Llevo tres meses esperando que me corrijan la factura electrónica rechazada por la DIAN y nadie responde. Llamé al 310 555 0199 y nada.",
+        "publishedAtDate": "2026-09-14T15:02:11.000Z",
+        "reviewId": "RevFakeLow0001",
+        "reviewUrl": "https://www.google.com/maps/reviews/data=RevFakeLow0001",
+        "reviewerId": "111111111111111111111",
+        "stars": 1,
+        "responseFromOwnerText": "Lamentamos su experiencia, escríbanos al correo soporte@contables.example"
+      },
+      {
+        "text": "Regular. El software contable que venden se cae los cierres de mes y el soporte tarda días en contestar.",
+        "publishedAtDate": "2026-08-02T10:00:00.000Z",
+        "reviewId": "RevFakeMid0002",
+        "reviewUrl": "https://www.google.com/maps/reviews/data=RevFakeMid0002",
+        "reviewerId": null,
+        "stars": 3
+      },
+      {
+        "text": "Excelente atención, me ayudaron con la declaración de renta a tiempo y muy amables.",
+        "reviewId": "RevFakeHigh0003",
+        "stars": 5
+      },
+      {
+        "text": "",
+        "reviewId": "RevFakeEmpty0004",
+        "stars": 1
+      },
+      {
+        "text": "Malo",
+        "reviewId": "RevFakeShort0005",
+        "stars": 1
+      }
+    ]
+  },
+  {
+    "title": "Oficina Software Nube Bogotá",
+    "categoryName": null,
+    "reviews": [
+      {
+        "text": "Pagamos la licencia anual y la nómina electrónica sigue saliendo con errores en los ajustes de prima.",
+        "publishedAtDate": "2026-10-20T08:30:00.000Z",
+        "reviewId": "RevFakeLow0006",
+        "reviewerId": "******",
+        "stars": 2
+      }
+    ]
+  }
+]

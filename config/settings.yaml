@@ -47,6 +47,56 @@ collectors:
     order: time                # time (newest first) | relevance
     include_replies: true      # replies by the video's own channel are always left out
     min_interval_s: 0.5
+  apify:
+    # Needs APIFY_TOKEN in .env (each source is skipped with a log line otherwise). Actor ids
+    # and inputs live here so an actor can be swapped; a replacement needs the same output
+    # shape (or a parser change in src/niche_miner/collectors/apify_*.py). Placeholders:
+    # "{target}" = the niche's query / hashtag / group URL; "{video_urls}" = the list of videos.
+    # Apify charges per item returned, re-collected ones included. Prices below are the
+    # free-plan rates checked 2026-11-09 ($5 of credit a month).
+    max_charge_usd: 0.25       # default cost cap per actor run
+    run_timeout_s: 900
+    gmaps:                     # per query: ≈ 10 places × $0.004 + up to 200 reviews × $0.0005
+      max_stars: 3             # keep reviews with at most this many stars
+      run:
+        actor: compass/crawler-google-places
+        # This actor refuses caps under $0.50; the input below (10 places × 20 reviews) is
+        # what keeps a run near $0.15.
+        max_charge_usd: 0.50
+        input:
+          searchStringsArray: ["{target}"]
+          language: es
+          maxCrawledPlacesPerSearch: 10
+          maxReviews: 20       # per place, worst first
+          reviewsSort: lowestRanking
+          reviewsOrigin: google
+          scrapeReviewsPersonalData: false   # no reviewer names, ids or photos
+    tiktok:                    # per hashtag: ≈ 8 videos × $0.003 + up to 200 comments × $0.00125
+      videos:
+        actor: clockworks/free-tiktok-scraper
+        max_items: 8
+        max_charge_usd: 0.05
+        input:
+          hashtags: ["{target}"]
+          resultsPerPage: 8
+      comments:
+        actor: clockworks/tiktok-comments-scraper
+        max_items: 200
+        max_charge_usd: 0.30
+        input:
+          postURLs: "{video_urls}"
+          commentsPerPost: 25
+          maxRepliesPerComment: 0
+    facebook:                  # per group: up to 30 posts × $0.005 (top comments come free)
+      include_comments: true
+      run:
+        actor: apify/facebook-groups-scraper
+        max_items: 30
+        max_charge_usd: 0.20
+        input:
+          startUrls: [{url: "{target}"}]
+          resultsLimit: 30
+          viewOption: CHRONOLOGICAL
 
 clustering:
   method: auto            # auto | hdbscan | llm (auto = llm below llm_max_pains pains per niche)

@@ -133,7 +133,8 @@ def test_source_hint_names_the_reviewed_app():
     url = "https://play.google.com/store/apps/details?id=com.siigo.nubeapp&hl=es&reviewId=x"
     assert "com.siigo.nubeapp" in source_hint("google_play", url)
     assert "'Video:'" in source_hint("youtube", None)
-    assert source_hint("apify_tiktok", None) == "apify_tiktok"  # no hint: the source name
+    assert "'Video de TikTok:'" in source_hint("apify_tiktok", None)
+    assert source_hint("otra_fuente", None) == "otra_fuente"  # no hint: the source name
 
 
 # --- extractor flow ------------------------------------------------------------------------

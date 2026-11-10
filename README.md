@@ -17,7 +17,7 @@ uv run niche-miner run-all --niche contadores_pymes --limit 50   # quick test ru
 uv run niche-miner run-all --niche contadores_pymes              # full run
 ```
 
-Or step by step: `collect --niche X [--source google_play|computrabajo|youtube] [--limit N]`, `extract`,
+Or step by step: `collect --niche X [--source google_play|computrabajo|youtube|apify_gmaps|apify_tiktok|apify_facebook] [--limit N]`, `extract`,
 `cluster`, `score`, `report`. Reports land in `data/reports/YYYY-MM-DD.md`; everything else
 in `data/signals.db`. Re-running `collect` only adds new signals; `extract` only processes
 signals it hasn't seen (`--retry-failed` re-runs failures).
@@ -42,6 +42,20 @@ signals it hasn't seen (`--retry-failed` re-runs failures).
   403 (`PA_UNAUTHORIZED_RESULT_FROM_POLICIES`). Only `/questions/search?item=` answers, and that
   gives few, short pre-sale questions. Pages can't be scraped instead: the spec allows only the API
   for this site.
+- `apify_gmaps`, `apify_tiktok`, `apify_facebook` — Google Maps reviews for the `gmaps_queries`,
+  TikTok comments on videos found through the `tiktok_hashtags`, and posts plus top comments
+  from the public `facebook_groups`. All three run Apify actors and need `APIFY_TOKEN` in
+  `.env`; without it they're skipped.
+  - Actors and inputs are set under `collectors.apify` in `config/settings.yaml`. A replacement
+    actor needs the same output shape, or a parser change.
+  - Apify charges per item returned, including items already in the DB. Every run has a cost
+    cap and an item cap, and `--limit` lowers the item cap. Each run's cost is logged. The
+    defaults cost about $0.15 per Maps query, $0.30 per hashtag and $0.15 per group at
+    free-plan rates.
+  - Maps reviews are kept at 3 stars or fewer. Reviewer personal data is never fetched.
+  - TikTok comments by the video's author are left out.
+  - Authors are only hashed, and texts are scrubbed. The place name, video caption, group name
+    or commented post is added as the first line after filtering.
 
 ## Review loop
 
