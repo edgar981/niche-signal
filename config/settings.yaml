@@ -123,8 +123,8 @@ scoring:                  # see the formula printed at the top of each report
   # Set by hand to 15 for now. `niche-miner calibrate` sets it to the 90th percentile of the
   # cluster sums across all niches collected: run it once after the 35-niche Computrabajo
   # pass, then leave it fixed (a second run needs --force).
-  frequency_ceiling: 15
-  frequency_recalibrated_at: null   # date of the last `calibrate`; null = set by hand
+  frequency_ceiling: 7.65
+  frequency_recalibrated_at: 2026-11-11   # date of the last `calibrate`; null = set by hand
   frequency_saturation: 200      # only for the old author-count comparison ("old freq.")
   spend: 30
   b2b: 0                  # 2026-11-10 (user): off; consumers were 0 of 613 pains, so it was
